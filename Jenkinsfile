@@ -39,11 +39,11 @@ pipeline {
         }
         success {
             slackSend color: 'good',
-                message: "Pipeline for ${env.BRANCH_NAME} passed!"
+                message: "Pipeline for ${env.BRANCH_NAME} passed: ${env.BUILD_URL}"
         }
         failure {
             slackSend color: 'danger',
-                message: "Pipeline for ${env.BRANCH_NAME} failed!"
+                message: "Pipeline for ${env.BRANCH_NAME} failed: ${env.BUILD.URL}"
         }
     }
 }
