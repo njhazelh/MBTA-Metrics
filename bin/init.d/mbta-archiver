@@ -4,7 +4,7 @@ APPNAME=mbta-archiver
 LOGFILE="/var/log/mbta/${APPNAME}.log"
 PIDFILE="/var/run/mbta/${APPNAME}.pid"
 USER="mbta-app"
-SCRIPT="python archiver.py"
+SCRIPT="python -m mbtaalerts.archiver
 
 start() {
     echo "Starting $APPNAME" >&2
@@ -20,7 +20,7 @@ start() {
         mkdir -p /var/run/mbta
     fi
     cd /var/mbta-app/
-    source /var/mbta-app/activate.sh
+    source /var/mbta-app/bin/activate.sh
     local CMD="$SCRIPT &>> \"$LOGFILE\" & echo \$!"
     su -c "$CMD" "$USER" > "$PIDFILE"
     echo "Service started with pid=$(cat $PIDFILE)" >&2

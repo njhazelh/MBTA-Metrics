@@ -4,7 +4,7 @@ MSD Repo for CS4500 Spring 2017
 ## Development
 This project relies on at least python 3.4.
 
-To activate the virtual environment run `source activate.sh` from the project root.
+To activate the virtual environment run `source ./bin/activate.sh` from the project root.
 This should:
 - Check that you are using the correct python version.
 - Create the virtual environment if it doesn't exist.

@@ -5,6 +5,8 @@ import time
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s %(message)s', datefmt='%m/%d %H:%M:%S', level=os.environ.get("LOGLEVEL", "INFO"))
 LOG = logging.getLogger("archive")
 
+def helper_function():
+    return 1
 
 def main():
     while True:

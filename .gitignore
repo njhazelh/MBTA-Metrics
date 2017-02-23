@@ -2,3 +2,5 @@ mbta-env
 __pycache__
 .coverage
 nose2-junit.xml
+htmlcov
+*.pyc
