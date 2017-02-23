@@ -1,3 +1,4 @@
 mbta-env
 __pycache__
 .coverage
+settings.cfg
