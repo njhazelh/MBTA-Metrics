@@ -8,6 +8,7 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 # read from settings file
 config = configparser.ConfigParser()
 config.read("settings.cfg")
+
 host = config.get('Database', 'host')
 port = config.get('Database', 'port')
 db = config.get('Database', 'db')
