@@ -1,3 +1,5 @@
+#!groovy
+
 pipeline {
     agent any
     stages {
@@ -7,8 +9,8 @@ pipeline {
                     if [[ -d mbta-env ]]; then
                         rm -rf mbta-env/
                     fi
-                    . activate.sh
-                    python3 -m nose2 --plugin nose2.plugins.junitxml --junit-xml
+                    . ./bin/activate.sh
+                    python3 -m nose2 -c unittest.cfg
                 '''
             }
         }
@@ -25,6 +27,14 @@ pipeline {
         always {
             echo "Cleaning up and archiving"
             junit 'nose2-junit.xml'
+            publishHTML(target: [
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: 'htmlcov',
+                reportFiles: 'index.html',
+                reportName: 'Coverage Report'
+            ])
             deleteDir()
         }
         success {
