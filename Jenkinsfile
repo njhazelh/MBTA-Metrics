@@ -1,11 +1,14 @@
 pipeline {
-    agent { docker 'python:3.5' }
+    agent any
     stages {
         stage('test') {
             steps {
-                sh '''#!/bin/bash -l
-                    source activate.sh
-                    nose2 --plugin nose2.plugins.junitxml --junit-xml
+                sh '''#!/bin/bash
+                    if [[ -d mbta-env ]]; then
+                        rm -rf mbta-env/
+                    fi
+                    . activate.sh
+                    python3 -m nose2 --plugin nose2.plugins.junitxml --junit-xml
                 '''
             }
         }
@@ -20,8 +23,17 @@ pipeline {
     }
     post {
         always {
+            echo "Cleaning up and archiving"
             junit 'nose2-junit.xml'
             deleteDir()
+        }
+        success {
+            slackSend color: 'good',
+                message: "Pipeline for ${env.BRANCH_NAME} passed!"
+        }
+        failure {
+            slackSend color: 'danger',
+                message: "Pipeline for ${env.BRANCH_NAME} failed!"
         }
     }
 }
