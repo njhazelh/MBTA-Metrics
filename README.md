@@ -14,6 +14,6 @@ This should:
 ## Testing
 This project uses the nose testing framework, which should discover your tests automagically.
 
-To run the project tests, run `nosetests`.
+To run the project tests, run `nose2`.
 
 
