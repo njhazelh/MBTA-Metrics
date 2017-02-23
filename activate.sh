@@ -24,6 +24,9 @@ main() {
         create_env
     fi
     source "$ENV_NAME/bin/activate"
-    pip install -r requirements.txt >/dev/null
+    # HACK: In some cases the shebang in pip can be too long, which
+    # cases it to throw a 'bad interpreter'.  By running
+    # pip directly through python, we bypass the shebang.
+    python3 -m pip install -r requirements.txt >/dev/null
 }
 main
