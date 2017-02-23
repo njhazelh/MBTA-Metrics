@@ -2,7 +2,7 @@ import os
 import logging
 import time
 
-logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
+logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s %(message)s', datefmt='%m/%d %H:%M:%S', level=os.environ.get("LOGLEVEL", "INFO"))
 LOG = logging.getLogger("archive")
 
 
@@ -11,7 +11,7 @@ def main():
         LOG.info("still running")
         # Sleep for 1 minute
         time.sleep(60)
-
+    LOG.info("finished")
 
 if __name__ == "__main__":
     main()
