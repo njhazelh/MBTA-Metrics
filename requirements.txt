@@ -9,5 +9,6 @@ nose2==0.6.5
 packaging==16.8
 pep8==1.7.0
 pyparsing==2.1.10
+requests==2.13.0
 six==1.10.0
 wrapt==1.10.8
