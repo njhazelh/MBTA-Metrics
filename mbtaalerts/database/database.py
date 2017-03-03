@@ -1,17 +1,17 @@
 import configparser
 import enum
 import logging
-import requests
+from mbtaalerts.database import populate
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData, \
-    ForeignKey, ARRAY, DateTime, Date, Time, Interval, Boolean, CheckConstraint, Enum
+    ForeignKey, DateTime, Date, Time, Interval, Boolean, CheckConstraint, Enum
 
 logging.basicConfig()
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 # read from settings file
 config = configparser.ConfigParser()
-config.read("settings.cfg")
+config.read("../../settings.cfg")
 host = config.get('Database', 'host')
 port = config.get('Database', 'port')
 db = config.get('Database', 'db')
@@ -28,7 +28,7 @@ class DelayAccuracy(enum.Enum):
     accurate = 1
     high = 2
 
-# tables
+# create tables
 metadata = MetaData()
 
 routes = Table('routes', metadata,
@@ -83,23 +83,28 @@ alert_effect_period = Table('alert_effect_period', metadata,
                             Column('effect_end', DateTime)
                             )
 
-alert_affected_services = Table('alert_effect_period', metadata,
+alert_affected_services = Table('alert_affected_services', metadata,
                                 Column('id', Integer, primary_key=True, autoincrement=True),
                                 Column('alert_id', None, ForeignKey("alerts.alert_id")),
-                                Column('route_id', None, ForeignKey("routes.route_id")),
+                                Column('route_id', None, ForeignKey("routes.id")),
                                 Column('trip_id', String(64)),
                                 Column('trip_name', String(64))
                                 )
 
-# populate routes and stops tables, commuter rail only
-
-
-
 # create tables if they don't exist
 engine = sqlalchemy.create_engine('postgresql://' + user + ':' + passwd + '@'
                                   + host + ':' + port + '/' + db)
+
 connection = engine.connect()
 metadata.create_all(engine)
+
+# populate routes table
+cr_routes = populate.routes()
+for item in cr_routes:
+    values = {'id': item.get('route_id'), 'name': item.get('route_name')}
+    insert_route = sqlalchemy.insert(routes, values=values)
+    connection.execute(insert_route)
+
 connection.close()
 
 
