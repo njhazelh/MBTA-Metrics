@@ -1,6 +1,7 @@
 import configparser
 import enum
 import logging
+import requests
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData, \
     ForeignKey, ARRAY, DateTime, Date, Time, Interval, Boolean, CheckConstraint, Enum
@@ -32,8 +33,7 @@ metadata = MetaData()
 
 routes = Table('routes', metadata,
                Column('id', String(32), primary_key=True, unique=True),
-               Column('name', String(32), nullable=False),
-               Column('stops', ARRAY(String(32), dimensions=1)))
+               Column('name', String(32), nullable=False))
 
 stops = Table('stops', metadata,
                Column('id', String(32), primary_key=True, unique=True),
@@ -52,20 +52,48 @@ alert_events = Table('alert_events', metadata,
                      Column('scheduled_departure', DateTime),
                      Column('actual_departure', DateTime),
                      Column('delay', Interval),
-                     Column('alert_issued', Boolean)
+                     Column('alert_issued', Boolean),
+                     Column('time', Time),
+                     Column('deserves_alert', Boolean),
+                     Column('alert_delay', Interval),
+                     Column('alert_timely', Boolean),
+                     Column('alert_text', String(300)),
+                     Column('predicted_delay', Interval),
+                     Column('delay_accuracy', Enum(DelayAccuracy))
                      )
 
 alerts = Table('alerts', metadata,
-              Column('id', Integer, primary_key=True, autoincrement=True),
-              Column('alert_event', None, ForeignKey("alert_events.id")),
-              Column('time', Time),
-              Column('deserves_alert', Boolean),
-              Column('alert_delay', Interval),
-              Column('alert_timely', Boolean),
-              Column('alert_text', String(300)),
-              Column('predicted_delay', Interval),
-              Column('delay_accuracy', Enum(DelayAccuracy))
-              )
+               Column('alert_id', Integer, primary_key=True),
+               Column('effect_name', String(32)),
+               Column('effect', String(32)),
+               Column('cause', String(64)),
+               Column('header_text', String(256)),
+               Column('short_header_text', String(256)),
+               Column('severity', String(16)),
+               Column('created_dt', DateTime),
+               Column('last_modified_dt', DateTime),
+               Column('service_effect_text', String(256)),
+               Column('alert_lifecycle', String(16))
+               )
+
+alert_effect_period = Table('alert_effect_period', metadata,
+                            Column('id', Integer, primary_key=True, autoincrement=True),
+                            Column('alert_id', None, ForeignKey("alerts.alert_id")),
+                            Column('effect_start', DateTime),
+                            Column('effect_end', DateTime)
+                            )
+
+alert_affected_services = Table('alert_effect_period', metadata,
+                                Column('id', Integer, primary_key=True, autoincrement=True),
+                                Column('alert_id', None, ForeignKey("alerts.alert_id")),
+                                Column('route_id', None, ForeignKey("routes.route_id")),
+                                Column('trip_id', String(64)),
+                                Column('trip_name', String(64))
+                                )
+
+# populate routes and stops tables, commuter rail only
+
+
 
 # create tables if they don't exist
 engine = sqlalchemy.create_engine('postgresql://' + user + ':' + passwd + '@'
