@@ -4,3 +4,4 @@ __pycache__
 nose2-junit.xml
 htmlcov
 *.pyc
+settings.cfg

@@ -1,0 +1,6 @@
+[Database]
+host = somehost
+port = someport
+db = somedb
+user = someuser
+pass = somepass

@@ -1,6 +1,9 @@
 # Massachusetts-Bay-Transit-Authority
 MSD Repo for CS4500 Spring 2017
 
+## Configuration
+To establish a database connection, first rename the "settings.cfg.EXAMPLE" file to "settings.cfg".
+Under the Database section of "settings.cfg", change the values to your user/pass pair, etc. 
 ## Development
 This project relies on at least python 3.4.
 
