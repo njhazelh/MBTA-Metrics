@@ -14,21 +14,33 @@ You also want to install yarn to dependency management
 sudo apt-get install yarn
 ```
 
+Note: The default (`npm`) may also work, but yarn is faster.
+
 ## Development
 ```bash
 cd <webapp_root>
+
+# Install dependencies
 yarn
 
 # Start the development server on port 8080
 # This will enable you to see the webapp in your browser
-yarn dev-server
+yarn dev
+```
+
+```bash
+# Run the linter
+yarn lint
+
+# Have the linter fix style issues
+yarn lint:fix
 ```
 
 ## Deployment
 **Work in Progress**
 
 ```bash
-webpack build-prod
+webpack build:prod
 ...
 ```
 

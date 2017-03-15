@@ -1,0 +1,19 @@
+{
+    "plugins": [
+        "react",
+        "jsx-a11y",
+        "import"
+    ],
+    "extends": [
+        "airbnb",
+        "plugin:react/recommended"
+    ],
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "rules": {
+        "indent": ["error", 4],
+        "react/prefer-stateless-function": 0
+    }
+}

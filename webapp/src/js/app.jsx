@@ -9,16 +9,24 @@ import {
     hashHistory,
 } from 'react-router';
 
-const WebApp = () => {
-    const { children } = this.props;
-    return (
-      <div className="app">
-        <h1>MBTA Alert Metrics</h1>
-        <Link to="/">Home</Link>
-        <Link to="/test">Test</Link>
-        { children }
-      </div>
-    );
+class WebApp extends React.Component {
+    render() {
+        return (<div className="app">
+          <h1>MBTA Alert Metrics</h1>
+          <Link to="/">Home</Link>
+          <Link to="/test">Test</Link>
+          { this.props.children }
+        </div>);
+    }
+}
+
+
+WebApp.propTypes = {
+    children: React.PropTypes.node,
+};
+
+WebApp.defaultProps = {
+    children: [],
 };
 
 const Hello = () => <p>Hello World</p>;
