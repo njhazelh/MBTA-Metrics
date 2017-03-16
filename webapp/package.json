@@ -8,7 +8,7 @@
     "lint": "eslint --color -c .eslintrc.json",
     "lint:fix": "eslint --color -c .eslintrc.json --fix",
     "build": "webpack -d --color --progress --devtool sourcemap",
-    "build:prod": "webpack --optimize-minimize",
+    "build:prod": "webpack --config webpack.prod.config.js --optimize-minimize",
     "dev": "webpack-dev-server --colors --host 0.0.0.0 --content-base dist --devtool sourcemap --progress -d"
   },
   "repository": {
@@ -40,7 +40,6 @@
   "dependencies": {
     "bootstrap": "^3.3.7",
     "react": "^15.4.2",
-    "react-bootstrap": "^0.30.8",
     "react-dom": "^15.4.2",
     "react-router": "3"
   }
