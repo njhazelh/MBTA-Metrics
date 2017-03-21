@@ -11,10 +11,16 @@ import requests
 
 import configparser
 import sqlalchemy
+import itertools
 # from sqlalchemy.sql import table, column, select, update, insert
 from sqlalchemy import *
+from datetime import datetime, timezone
 
 connection = None
+
+alertsTable = None
+affectedServicesTable = None
+effectPeriodsTable = None
 
 logging.basicConfig(
     format='%(asctime)s %(name)s %(levelname)s %(message)s',
@@ -23,6 +29,10 @@ logging.basicConfig(
 LOG = logging.getLogger("archive")
 
 def buildAlertEntry(alert):
+
+    stampCreated = datetime.fromtimestamp(int(alert['created_dt']), timezone.utc)
+    stampModified = datetime.fromtimestamp(int(alert['last_modified_dt']), timezone.utc)
+
     entry = {
             'alert_id': str(alert['alert_id']),
             'effect_name': str(alert['effect_name']),
@@ -31,8 +41,8 @@ def buildAlertEntry(alert):
             'header_text': str(alert['header_text']),
             'short_header_text': str(alert['short_header_text']),
             'severity': str(alert['severity']),
-            #'created_dt': str(alert['created_dt']),
-            #'last_modified_dt': str(alert['last_modified_dt']),
+            'created_dt': str(stampCreated),
+            'last_modified_dt': str(stampModified),
             'service_effect_text': str(alert['service_effect_text']),
             'alert_lifecycle': str(alert['alert_lifecycle']),
             }
@@ -42,7 +52,7 @@ def buildAlertEntry(alert):
 def buildAffectedServcesEntry(alertId, affectedService):
     entry = {
             'alert_id': alertId,
-            'route_id': str(affectedService.get('route_id', "")),
+            'route_id': str(affectedService.get('route_id', None)),
             'trip_id': str(affectedService.get('trip_id', "")),
             'trip_name': str(affectedService.get('trip_name', "")),
             }
@@ -51,10 +61,21 @@ def buildAffectedServcesEntry(alertId, affectedService):
 
 
 def buildEffectPeriodsEntry(alertId, effectPeriod):
+
+
+    stampStart = str(datetime.fromtimestamp(int(effectPeriod['effect_start']), timezone.utc))
+
+    # The effect end time may be empty if it's not known
+    effectEnd = effectPeriod['effect_end']
+    if (effectEnd != ''):
+        stampEnd = str(datetime.fromtimestamp(int(effectPeriod['effect_end']), timezone.utc))
+    else:
+        stampEnd = None
+
     entry = {
             'alert_id': alertId,
-            'effect_start': str(effectPeriod['effect_start']),
-            'effect_end': str(effectPeriod['effect_end'])
+            'effect_start': stampStart,
+            'effect_end': stampEnd
             }
 
     return entry
@@ -74,7 +95,7 @@ def databaseConnect():
 
     return engine
 
-def buildInsertions(alertsTable, alertsInfo):
+def buildInsertions(alertsInfo):
 
     alertInsertions = []
     affectedServiceInsertionLists = []
@@ -102,26 +123,68 @@ def buildInsertions(alertsTable, alertsInfo):
             effectPeriodInsertions.append(effectPeriodEntry)
 
         if commuter:
-            
             alertEntry = buildAlertEntry(alert)
 
+            # Find existing alerts that match this ID
+            # If there's a match and the timestamp is newer, add and increment 'version'
             s = select([alertsTable]).where(alertsTable.c.alert_id == alertId)
             matches = connection.execute(s)
             numMatches = 0
-            for row in matches:
-                numMatches += 1
 
-            # If this alert is new, insert it
-            # Otherwise, update the existing alert
-            if (numMatches == 0):
+            # TODO if null here?
+            lastModDate = datetime.fromtimestamp(int(alert['last_modified_dt']), timezone.utc)
+            lastModDate = lastModDate.replace(tzinfo=None)
+
+            shouldInsert = True
+            numDuplicates = 0
+
+            for row in matches:
+
+                numDuplicates += 1
+
+                if (str(row.last_modified_dt) == str(lastModDate)):
+                    shouldInsert == False
+                else:
+                    numDuplicates
+                # Otherwise, we found an alert ID match with new last-modified stamp
+                # We should reinsert the alert as a duplicate but increment the 'version'
+
+            # TODO don't re-insert affected services or effect periods for alert updates?
+            if (numDuplicates == 0):
                 alertInsertions.append(alertEntry)
+                affectedServiceInsertionLists.append(affectedServiceInsertions)
+                effectPeriodInsertionLists.append(effectPeriodInsertions)
+
             #else:
             #    alertUpdates.append(alertEntry)
 
-            affectedServiceInsertionLists.append(affectedServiceInsertions)
-            effectPeriodInsertionLists.append(effectPeriodInsertions)
-
     return alertInsertions, affectedServiceInsertionLists, effectPeriodInsertionLists
+
+def performInsertions(alertInsertions, affectedServiceInsertionLists, effectPeriodInsertionLists):
+    affectedServiceInsertions = []
+    effectPeriodInsertions = []
+
+    # Combine all of the alerts' affected services into a single batch
+    # This lets us perform a single database update
+    for affectedServiceInsertion in [item for sublist in affectedServiceInsertionLists for item in sublist]:
+        affectedServiceInsertions.append(affectedServiceInsertion)
+
+    for effectPeriodInsertion in [item for sublist in effectPeriodInsertionLists for item in sublist]:
+        effectPeriodInsertions.append(effectPeriodInsertion)
+
+    newAlertsNum = len(alertInsertions)
+    newServicesNum = len(affectedServiceInsertions)
+    newPeriodsNum = len(effectPeriodInsertions)
+    
+    if (newAlertsNum > 0):
+        print("Inserting " + str(newAlertsNum) + " new alerts.")
+        alertIns = connection.execute(alertsTable.insert(), alertInsertions)
+    if (newServicesNum > 0):
+        print("Inserting " + str(newServicesNum) + " new affected services.")
+        serviceIns = connection.execute(affectedServicesTable.insert(), affectedServiceInsertions)
+    if (newPeriodsNum > 0):
+        print("Inserting " + str(newPeriodsNum) + " new alert effect periods.")
+        periodIns = connection.execute(effectPeriodsTable.insert(), effectPeriodInsertions)
 
 def main():
     """
@@ -135,28 +198,24 @@ def main():
     connection = engine.connect()
 
     # Load table information for alerts
+    global alertsTable, affectedServicesTable, effectPeriodsTable
     alertsTable = Table('alerts', metadata, autoload=True)
     affectedServicesTable = Table('alert_affected_services', metadata, autoload=True)
     effectPeriodsTable = Table('alert_effect_period', metadata, autoload=True)
 
-    alertUpdates = []
+    requestUrl = "http://realtime.mbta.com/developer/api/v2/alerts?"
+    requestUrl += "api_key=wX9NwuHnZU2ToO7GmGR9uw&"
+    requestUrl += "include_access_alerts=false&"
+    requestUrl += "include_service_alerts=true&"
+    requestUrl += "format=json"
 
-    requestUrl = "http://realtime.mbta.com/developer/api/v2/alerts?api_key=wX9NwuHnZU2ToO7GmGR9uw&include_access_alerts=false&include_service_alerts=true&format=json"
     r = requests.get(requestUrl)
     alertsInfo = r.json()
 
-    alertInsertions, affectedServiceInsertionLists, effectPeriodInsertionLists = buildInsertions(alertsTable, alertsInfo)
-                 
-    insResult = connection.execute(alertsTable.insert(), alertInsertions)
-    print("Alert nsertions: " + str(insResult))
+    alertInsertions, affectedServiceInsertionLists, effectPeriodInsertionLists = buildInsertions(alertsInfo)
+    performInsertions(alertInsertions, affectedServiceInsertionLists, effectPeriodInsertionLists)
 
-    # for affectedServiceInsertions in affectedServiceInsertionLists:
-        
-    #     insResult = connection.execute(affectedServicesTable.insert(), affectedServiceInsertions)
-    #     print("Affected service insertions: " + str(insResult))
-
-    #upResult = connection.execute(alertsTable.update(), alertUpdates)
-    #print("Updates: " + str(upResult))
+    print("Finished scanning for updates.")
 
 if __name__ == "__main__":
     main()
