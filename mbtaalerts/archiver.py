@@ -147,10 +147,14 @@ def buildInsertions(alertsInfo):
 
             # Ignore duplicate alerts
             if (not isDuplicate):
+
                 if (isUpdate):
-                    pass
+                    LOG.info("Found updated alert with ID " + alertId)
+                    continue
                     # TODO: increment the alert's version' before reinsertion
                     # TODO: also update entries in affected services / effect periods tables?
+                else:
+                    LOG.info("Found new alert with ID " + alertId)
 
                 alertEntry = buildAlertEntry(alert)
                 alertInsertions.append(alertEntry)
@@ -171,13 +175,13 @@ def performInsertions(alertInsertions, affectedServiceInsertions, effectPeriodIn
     newPeriodsNum = len(effectPeriodInsertions)
     
     if (newAlertsNum > 0):
-        LOG.info("Inserting " + str(newAlertsNum) + " new alerts.")
+        LOG.info("Inserting " + str(newAlertsNum) + " alerts.")
         alertIns = connection.execute(alertsTable.insert(), alertInsertions)
     if (newServicesNum > 0):
-        LOG.info("Inserting " + str(newServicesNum) + " new affected services.")
+        LOG.info("Inserting " + str(newServicesNum) + " affected services.")
         serviceIns = connection.execute(affectedServicesTable.insert(), affectedServiceInsertions)
     if (newPeriodsNum > 0):
-        LOG.info("Inserting " + str(newPeriodsNum) + " new alert effect periods.")
+        LOG.info("Inserting " + str(newPeriodsNum) + " alert effect periods.")
         periodIns = connection.execute(effectPeriodsTable.insert(), effectPeriodInsertions)
 
 def main():
