@@ -7,7 +7,7 @@ USER="mbta-app"
 SCRIPT="gunicorn -w 4 -b 0.0.0.0:9000 mbtaalerts.api:APP"
 
 start() {
-    echo "Starting $APPNAME" > &2
+    echo "Starting $APPNAME" >&2
     if [ -f "$PIDFILE" ] && kill -0 $(cat "$PIDFILE") &>/dev/null; then
         echo "$APPNAME is already running" >&2
         return 1

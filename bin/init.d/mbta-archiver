@@ -4,7 +4,7 @@ APPNAME=mbta-archiver
 LOGFILE="/var/log/mbta/${APPNAME}.log"
 PIDFILE="/var/run/mbta/${APPNAME}.pid"
 USER="mbta-app"
-SCRIPT="python -m mbtaalerts.archiver
+SCRIPT="python -m mbtaalerts.archiver"
 
 start() {
     echo "Starting $APPNAME" >&2
@@ -29,7 +29,7 @@ start() {
 stop() {
     if [ ! -f "$PIDFILE" ] || ! kill -0 $(cat "$PIDFILE") &>/dev/null; then
         echo 'Service not running' >&2
-        return 1 
+        return 1
     fi
     echo 'Stopping service...' >&2
     kill -15 $(cat "$PIDFILE") && rm -f "$PIDFILE"
