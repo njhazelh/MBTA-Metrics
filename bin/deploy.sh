@@ -20,7 +20,8 @@ done
 
 # install the webapp
 cd webapp
+rm -rf /usr/share/ngnix/html
 yarn
-webpack build:prod
-cp dist/* /usr/share/nginx/html
+yarn build:prod
+cp -Rf dist/* /usr/share/nginx/html
 rm -rf dist
