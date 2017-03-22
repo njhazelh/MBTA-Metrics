@@ -1,0 +1,11 @@
+mbta-env
+__pycache__
+.coverage
+nose2-junit.xml
+htmlcov
+*.pyc
+settings.cfg
+
+# Webapp
+node_modules/
+dist/
