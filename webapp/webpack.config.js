@@ -4,10 +4,16 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    entry: './main.js',
+    entry: './index.js',
     output: {
         path: path.join(__dirname, 'dist'),
         filename: 'bundle.js',
+    },
+    resolve: {
+      extensions: ['.js', '.jsx', '.json'],
+      alias: {
+        'alert_events_api': path.resolve(__dirname, 'src/data/alert_events.json')
+      }
     },
     module: {
         loaders: [
@@ -27,29 +33,33 @@ module.exports = {
                 test: /\.html$/,
                 loader: 'html-loader',
             },
-            { 
-                test: /\.png$/, 
-                loader: "url-loader?limit=100000" 
-            },
-            { 
-                test: /\.jpg$/, 
-                loader: "file-loader" 
+            {
+                test: /\.png$/,
+                loader: "url-loader?limit=100000"
             },
             {
-                test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/, 
+                test: /\.jpg$/,
+                loader: "file-loader"
+            },
+            {
+                test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
                 loader: 'url-loader?limit=10000&mimetype=application/font-woff'
             },
             {
-                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, 
+                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
                 loader: 'url-loader?limit=10000&mimetype=application/octet-stream'
             },
             {
-                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, 
+                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
                 loader: 'file-loader'
             },
             {
-                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, 
+                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
                 loader: 'url-loader?limit=10000&mimetype=image/svg+xml'
+            },
+            {
+              test: /\.json$/,
+              loader: 'file-loader?name=data/[name]',
             }
         ]
     },
@@ -64,6 +74,5 @@ module.exports = {
             inject: 'body',
             template: 'src/templates/index.html',
         }),
-        new webpack.optimize.UglifyJsPlugin(),
     ]
 };
