@@ -1,0 +1,44 @@
+[
+  {
+    "actual_departure": "06:25:00",
+    "alert_delay": "06:15:00",
+    "alert_issued": true,
+    "alert_text": "Worcester Train 505 ...",
+    "date": "2017-10-12",
+    "delay": 15,
+    "direction": "Inbound",
+    "id": 1,
+    "predicted_delay": "10-15",
+    "route": "DEMO",
+    "scheduled_departure": "06:10:00",
+    "stop": "Framingham"
+  },
+  {
+    "actual_departure": "06:25:00",
+    "alert_delay": "06:15:00",
+    "alert_issued": true,
+    "alert_text": "Worcester Train 505 ...",
+    "date": "2017-10-12",
+    "delay": 15,
+    "direction": "Inbound",
+    "id": 2,
+    "predicted_delay": "10-15",
+    "route": "DEMO",
+    "scheduled_departure": "06:10:00",
+    "stop": "Framingham"
+  },
+  {
+    "actual_departure": "06:25:00",
+    "alert_delay": "06:15:00",
+    "alert_issued": true,
+    "alert_text": "Worcester Train 505 ...",
+    "date": "2017-10-12",
+    "delay": 15,
+    "direction": "Inbound",
+    "id": 3,
+    "predicted_delay": "10-15",
+    "route": "DEMO",
+    "scheduled_departure": "06:10:00",
+    "stop": "Framingham"
+  }
+]
