@@ -44,13 +44,14 @@ def databaseConnect():
 
     return engine
 
-def buildAlertEntry(alert):
+def buildAlertEntry(alert, version):
 
     stampCreated = datetime.fromtimestamp(int(alert['created_dt']), timezone.utc)
     stampModified = datetime.fromtimestamp(int(alert['last_modified_dt']), timezone.utc)
 
     entry = {
             'alert_id': str(alert['alert_id']),
+            #'version': str(version),
             'effect_name': str(alert['effect_name']),
             'effect': str(alert['effect']),
             'cause': str(alert['cause']),
@@ -65,11 +66,11 @@ def buildAlertEntry(alert):
 
     return entry
 
-def buildAffectedServcesEntry(alertId, affectedService):
+def buildAffectedServicesEntry(alertId, affectedService):
 
     entry = {
             'alert_id': alertId,
-            'route_id': str(affectedService.get('route_id', None)),
+            'route_id': str(affectedService.get('route_id')),
             'trip_id': str(affectedService.get('trip_id', None)),
             'trip_name': str(affectedService.get('trip_name', None)),
             }
@@ -120,7 +121,10 @@ def buildInsertions(alertsInfo):
             if (modeName == 'Commuter Rail'):
                 commuter = True
 
-                affectedServiceEntry = buildAffectedServcesEntry(alertId, affectedService)
+                # A commuter rail alert may (rarely) not have a route_id
+                if (affectedService.get('route_id')):
+                    affectedServiceEntry = buildAffectedServicesEntry(alertId, affectedService)
+
                 affectedServiceInsertions.append(affectedServiceEntry)
 
         # Only process commuter rail alerts
@@ -132,14 +136,18 @@ def buildInsertions(alertsInfo):
             # Find existing alerts that match this ID
             # TODO: only search a limited range of previous alerts/hours?
             s = select([alertsTable]).where(alertsTable.c.alert_id == alertId)
+
             idMatches = connection.execute(s)
 
             lastModDate = datetime.fromtimestamp(int(alert['last_modified_dt']), timezone.utc)
             lastModDate = lastModDate.replace(tzinfo=None)
 
+            numMatches = 0
+
             # If there were ID matches, check whether this alert is an
             # update (newer modified date) or a duplicate (same modified date)
             for sameIdAlert in idMatches:
+                numMatches += 1 
                 if (str(sameIdAlert.last_modified_dt) == str(lastModDate)):
                     isDuplicate = True
                 else:
@@ -147,16 +155,16 @@ def buildInsertions(alertsInfo):
 
             # Ignore duplicate alerts
             if (not isDuplicate):
+                version = numMatches + 1
 
                 if (isUpdate):
                     LOG.info("Found updated alert with ID " + alertId)
-                    continue
-                    # TODO: increment the alert's version' before reinsertion
+                    continue # TODO: allow insertion when version is implemented
                     # TODO: also update entries in affected services / effect periods tables?
                 else:
                     LOG.info("Found new alert with ID " + alertId)
 
-                alertEntry = buildAlertEntry(alert)
+                alertEntry = buildAlertEntry(alert, version)
                 alertInsertions.append(alertEntry)
 
                 # Record this alert's associated effect periods
