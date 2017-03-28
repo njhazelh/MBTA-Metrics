@@ -7,7 +7,7 @@ module.exports = {
     entry: './index.js',
     output: {
         path: path.join(__dirname, 'dist'),
-        filename: 'bundle.js',
+        filename: '[hash].bundle.js',
     },
     resolve: {
       extensions: ['.js', '.jsx'],

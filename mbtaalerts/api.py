@@ -49,7 +49,7 @@ def alert_events():
             "Worcester Train 505 ...",
             "10-15"),
         ae(
-            1,
+            2,
             date(2017, 10, 12).isoformat(),
             "Worcester",
             "Framingham",
@@ -62,7 +62,7 @@ def alert_events():
             "Worcester Train 505 ...",
             "10-15"),
         ae(
-            1,
+            3,
             date(2017, 10, 12).isoformat(),
             "Worcester",
             "Framingham",
