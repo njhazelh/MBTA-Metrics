@@ -8,6 +8,15 @@ body {
     margin-bottom: 100px;
 }
 
+.thead-default th {
+  color: #333;
+  background-color: #ccc;
+}
+
+.table-bordered td {
+  border: 1px solid #ccc;
+}
+
 .footer {
   position: absolute;
   height: 100px;
