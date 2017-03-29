@@ -31,20 +31,26 @@ class AlertEventList extends React.Component {
     }
 
     return (
-      <Table responsive striped>
-        <thead>
+      <Table responsive striped bordered className='table-sm mt-5'>
+        <thead className='thead-default'>
           <tr>
+            <th>Trip ID</th>
             <th>Date</th>
+            <th>Time</th>
+            <th>Day</th>
             <th>Route</th>
-            <th>Direction</th>
             <th>Stop</th>
+            <th>Direction</th>
+            <th>Short Name</th>
             <th>Scheduled Dep.</th>
             <th>Actual Dep.</th>
             <th>Delay</th>
-            <th>Alert</th>
+            <th>Alert?</th>
+            <th>Deserves Alert?</th>
             <th>Alert Delay</th>
             <th>Alert Text</th>
             <th>Predicted Delay</th>
+            <th>Delay Accuracy</th>
           </tr>
         </thead>
         <tbody>

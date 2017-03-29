@@ -1,8 +1,10 @@
 [
   {
-    "actual_departure": "06:25:00",
-    "alert_delay": "06:15:00",
+    "trip_id": "CR-WEEKDAY-FALL-16-415",
+    "actual_departure": "6:25 AM",
+    "alert_delay": "6:15 AM",
     "alert_issued": true,
+    "deserves_alert": true,
     "alert_text": "Worcester Train 505 ...",
     "date": "2017-10-12",
     "delay": 15,
@@ -10,13 +12,19 @@
     "id": 1,
     "predicted_delay": "10-15",
     "route": "DEMO",
-    "scheduled_departure": "06:10:00",
-    "stop": "Framingham"
+    "scheduled_departure": "6:10 AM",
+    "stop": "Framingham",
+    "delay_accuracy": "HIGH",
+    "day": "MONDAY",
+    "time": "6:08 AM",
+    "short_name": "SHORT"
   },
   {
-    "actual_departure": "06:25:00",
-    "alert_delay": "06:15:00",
+    "trip_id": "CR-WEEKDAY-FALL-16-415",
+    "actual_departure": "6:25 AM",
+    "alert_delay": "6:15 AM",
     "alert_issued": true,
+    "deserves_alert": true,
     "alert_text": "Worcester Train 505 ...",
     "date": "2017-10-12",
     "delay": 15,
@@ -24,13 +32,19 @@
     "id": 2,
     "predicted_delay": "10-15",
     "route": "DEMO",
-    "scheduled_departure": "06:10:00",
-    "stop": "Framingham"
+    "scheduled_departure": "6:10 AM",
+    "stop": "Framingham",
+    "delay_accuracy": "HIGH",
+    "day": "MONDAY",
+    "time": "6:08 AM",
+    "short_name": "SHORT"
   },
   {
-    "actual_departure": "06:25:00",
-    "alert_delay": "06:15:00",
+    "trip_id": "CR-WEEKDAY-FALL-16-415",
+    "actual_departure": "6:25 AM",
+    "alert_delay": "6:15 AM",
     "alert_issued": true,
+    "deserves_alert": true,
     "alert_text": "Worcester Train 505 ...",
     "date": "2017-10-12",
     "delay": 15,
@@ -38,7 +52,11 @@
     "id": 3,
     "predicted_delay": "10-15",
     "route": "DEMO",
-    "scheduled_departure": "06:10:00",
-    "stop": "Framingham"
+    "scheduled_departure": "6:10 AM",
+    "stop": "Framingham",
+    "delay_accuracy": "HIGH",
+    "day": "MONDAY",
+    "time": "6:08 AM",
+    "short_name": "SHORT"
   }
 ]
