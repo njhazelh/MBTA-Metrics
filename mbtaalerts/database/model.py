@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String, Date, Time, DateTime, Interval, 
     Enum
 import enum
 
+
 # enums
 class Direction(enum.Enum):
     inbound = 0
@@ -25,33 +26,27 @@ class Base(object):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
 
-class Routes():
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
+class Routes(Base):
+    __tablename__ = 'routes'
     id = Column(String(32), primary_key=True, unique=True)
     name = Column(String(32), nullable=False)
 
-    alert_affected_services = relationship("AlertAffectedServices", backref="routes", order_by="AlertAffectedServices.id")
+    alert_affected_services = relationship("AlertAffectedServices", backref="routes",
+                                           order_by="AlertAffectedServices.id")
     alert_events = relationship("AlertEvents", backref="routes", order_by="AlertEvents.id")
 
 
-class Stops():
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
+class Stops(Base):
+    __tablename__ = 'stops'
 
     id = Column(String(32), primary_key=True, unique=True)
     name = Column(String(32), nullable=False)
 
 
-class Alerts():
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
+class Alerts(Base):
+    __tablename__ = 'alerts'
 
-    alert_id = Column(Integer, primary_key=True)
+    alert_id = Column(Integer)
     effect_name = Column(String(32))
     effect = Column(String(32))
     cause = Column(String(64))
@@ -64,11 +59,12 @@ class Alerts():
     alert_lifecycle = Column(String(16))
 
     alert_effect_periods = relationship("AlertEffectPeriod", backref="alerts", order_by="AlertEffectPeriod.id")
-    alert_affected_services = relationship("AlertAffectedServices", backref="alerts", order_by="AlertAffectedServices.id")
+    alert_affected_services = relationship("AlertAffectedServices", backref="alerts",
+                                           order_by="AlertAffectedServices.id")
 
 
 class AlertEffectPeriod(Base):
-    __tablename__ = 'alert_affect_period'
+    __tablename__ = 'alert_effect_period'
     alert_id = Column(Integer)
     effect_start = Column(DateTime)
     effect_end = Column(DateTime)
