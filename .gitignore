@@ -4,6 +4,9 @@ __pycache__
 nose2-junit.xml
 htmlcov
 *.pyc
+
+# Database
+alembic.ini
 settings.cfg
 
 # Webapp
