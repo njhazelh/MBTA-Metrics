@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.orm import relationship
-from sqlalchemy import MetaData, Column, Integer, String, Date, Time, DateTime, Interval, Boolean, ForeignKey, CheckConstraint, \
+from sqlalchemy import Column, Integer, String, Date, Time, DateTime, Interval, Boolean, ForeignKey, CheckConstraint, \
     Enum
 import enum
 
@@ -84,7 +84,7 @@ class AlertAffectedServices(Base):
 
 class AlertEvents(Base):
     __tablename__ = 'alert_events'
-    trip_id = Column(String(100))
+    trip_id = Column(String(64))
     date = Column(Date)
     time = Column(Time)
     day = Column(Integer, CheckConstraint('day >= 0 AND day <= 6'))
