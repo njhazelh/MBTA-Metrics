@@ -11,7 +11,7 @@ import requests
 
 import configparser
 import sqlalchemy
-from sqlalchemy import MetaData, Table, select
+from sqlalchemy import MetaData, Table
 from datetime import datetime, timezone
 
 SCAN_INTERVAL_SECONDS = 60
@@ -103,6 +103,11 @@ class Archiver:
     affected_services_table = None
     effect_periods_table = None
 
+    known_id_lastmodified_pairs = []
+
+    def __init__(self):
+        self.known_id_lastmodified_pairs = []
+
     def initializeTableMetadata(self):
         """Load the table schemas and store them for later.."""
         engine = databaseConnect()
@@ -137,7 +142,7 @@ class Archiver:
             # Record this alert's affected services
             # in case we insert the alert later
             service_insertions = []
-            
+
             # Check whether this alert affects any commuter rail services
             for affected_service in alert['affected_services']['services']:
                 mode_name = affected_service.get('mode_name')
@@ -152,51 +157,43 @@ class Archiver:
 
             # Only process commuter rail alerts
             if commuter:
-                alert_id = str(alert['alert_id'])
                 is_update = False
                 is_duplicate = False
 
                 # Find existing alerts that match this ID
-                # TODO: only search a limited range of previous alerts/hours?
-                # TODO: locally cache known pairs of (alert_id, lastModifiedTime)
-                s = select([self.alerts_table]).where(self.alerts_table.c.alert_id == alert_id)
-
-                id_matches = self.connection.execute(s)
-
                 last_modified = datetime.fromtimestamp(int(alert['last_modified_dt']), timezone.utc)
                 last_modified = last_modified.replace(tzinfo=None)
 
-                num_matches = 0
-
                 # If there were ID matches, check whether this alert is an
                 # update (newer modified date) or a duplicate (same modified date)
-                for sameIdAlert in id_matches:
-                    num_matches += 1
-                    if str(sameIdAlert.last_modified_dt) == str(last_modified):
-                        is_duplicate = True
-                    else:
-                        is_update = True
+                for known_id_lastmodified in self.known_id_lastmodified_pairs:
+
+                    known_id = known_id_lastmodified[0]
+                    known_lastmodified = known_id_lastmodified[1]
+
+                    if known_id == alert_id:
+                        if known_lastmodified == last_modified:
+                            is_duplicate = True
+                        else:
+                            is_update = True
 
                 # Ignore duplicate alerts
                 if not is_duplicate:
 
-                    if is_update:
-                        #LOG.info("Found updated alert with ID " + alert_id)
-                        continue # TODO: allow insertion when version is implemented
-                        # TODO: also update entries in affected services / effect periods tables?
-                    else:
-                        LOG.info("Found new alert with ID " + alert_id)
+                    LOG.info("Adding alert with ID " + alert_id)
 
                     alert_entry = buildAlertEntry(alert)
                     alert_insertions.append(alert_entry)
+                    self.known_id_lastmodified_pairs.append((alert_id, last_modified))
 
-                    # Record this alert's associated effect periods
-                    for effect_period in alert['effect_periods']:
-                        effect_period_entry = buildEffectPeriodsEntry(alert_id, effect_period)
-                        periods_insert_batch.append(effect_period_entry)
+                    if not is_update:
+                        # Record this alert's associated effect periods
+                        for effect_period in alert['effect_periods']:
+                            effect_period_entry = buildEffectPeriodsEntry(alert_id, effect_period)
+                            periods_insert_batch.append(effect_period_entry)
 
-                    # Add all of the affected services we recorded earlier
-                    services_insert_batch.extend(service_insertions)
+                        # Add all of the affected services we recorded earlier
+                        services_insert_batch.extend(service_insertions)
 
         return alert_insertions, services_insert_batch, periods_insert_batch
 

@@ -8,18 +8,6 @@ import ast
 
 class ArchiverTest(unittest.TestCase):
 
-    testArchiver = None
-
-    @classmethod
-    def setUpClass(self):
-        self.testArchiver = mbtaalerts.archiver.Archiver()
-        self.testArchiver.initializeTableMetadata()
-
-    @classmethod
-    def tearDownClass(self):
-        pass
-        # TODO: Break database connection?
-
     def getNumInsertions(self, insertionBatch):
         return sum(1 for e in insertionBatch)
 
@@ -57,7 +45,8 @@ class ArchiverTest(unittest.TestCase):
         }}]}"""
 
         sampleAlertsDict = ast.literal_eval(sampleAlerts)
-        alertsIns, affectedServicesIns, effectPeriodsIns = self.testArchiver.buildAlertInsertions(sampleAlertsDict)
+        testArchiver = mbtaalerts.archiver.Archiver()
+        alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDict)
         self.assertEqual(self.getNumInsertions(alertsIns), 1)
         self.assertEqual(self.getNumInsertions(affectedServicesIns), 1)
         self.assertEqual(self.getNumInsertions(effectPeriodsIns), 1)
@@ -66,7 +55,7 @@ class ArchiverTest(unittest.TestCase):
 
     def testAcceptMixedServiceAlert(self):
         sampleAlerts = """{"alerts":
-        [{"alert_id":0,
+        [{"alert_id":7,
         "effect_name":"Delay",
         "effect":"OTHER_EFFECT",
         "cause":"UNKNOWN_CAUSE",
@@ -99,14 +88,15 @@ class ArchiverTest(unittest.TestCase):
         }}]}"""
 
         sampleAlertsDict = ast.literal_eval(sampleAlerts)
-        alertsIns, affectedServicesIns, effectPeriodsIns = self.testArchiver.buildAlertInsertions(sampleAlertsDict)
+        testArchiver = mbtaalerts.archiver.Archiver()
+        alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDict)
         self.assertEqual(self.getNumInsertions(alertsIns), 1)
         self.assertEqual(self.getNumInsertions(affectedServicesIns), 1)
         self.assertEqual(self.getNumInsertions(effectPeriodsIns), 1)
 
     def testIgnoreNonCommuterRail(self):
         sampleAlerts = """{"alerts":
-        [{"alert_id":0,
+        [{"alert_id":7,
         "effect_name":"Delay",
         "effect":"OTHER_EFFECT",
         "cause":"UNKNOWN_CAUSE",
@@ -132,20 +122,21 @@ class ArchiverTest(unittest.TestCase):
 
 
         sampleAlertsDict = ast.literal_eval(sampleAlerts)
-        alertsIns, affectedServicesIns, effectPeriodsIns = self.testArchiver.buildAlertInsertions(sampleAlertsDict)
+        testArchiver = mbtaalerts.archiver.Archiver()
+        alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDict)
         self.assertEqual(self.getNumInsertions(alertsIns), 0)
         self.assertEqual(self.getNumInsertions(affectedServicesIns), 0)
         self.assertEqual(self.getNumInsertions(effectPeriodsIns), 0)
 
-    # Don't test any output here, just ensure that the
-    # archiver can handle a massive batch of data
     def testProcessBlizzard(self):
         sampleAlertsDict = ast.literal_eval(self.sampleAlertsBlizzard)
-        alertsIns, affectedServicesIns, effectPeriodsIns = self.testArchiver.buildAlertInsertions(sampleAlertsDict)
+        testArchiver = mbtaalerts.archiver.Archiver()
+        alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDict)
+        self.assertEqual(self.getNumInsertions(alertsIns), 31)
 
     def testAddManyAffectedServices(self):
         sampleAlerts = """{"alerts":
-        [{"alert_id":0,
+        [{"alert_id":7,
         "effect_name":"Delay",
         "effect":"OTHER_EFFECT",
         "cause":"UNKNOWN_CAUSE",
@@ -171,14 +162,15 @@ class ArchiverTest(unittest.TestCase):
                 []
         }}]}"""
         sampleAlertsDict = ast.literal_eval(sampleAlerts)
-        alertsIns, affectedServicesIns, effectPeriodsIns = self.testArchiver.buildAlertInsertions(sampleAlertsDict)
+        testArchiver = mbtaalerts.archiver.Archiver()
+        alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDict)
         self.assertEqual(self.getNumInsertions(alertsIns), 1)
         self.assertEqual(self.getNumInsertions(affectedServicesIns), 4)
         self.assertEqual(self.getNumInsertions(effectPeriodsIns), 1)
 
     def testIndefiniteEffectPeriod(self):
         sampleAlerts = """{"alerts":
-        [{"alert_id":0,
+        [{"alert_id":7,
         "effect_name":"Delay",
         "effect":"OTHER_EFFECT",
         "cause":"UNKNOWN_CAUSE",
@@ -201,7 +193,122 @@ class ArchiverTest(unittest.TestCase):
                 []
         }}]}"""
         sampleAlertsDict = ast.literal_eval(sampleAlerts)
-        alertsIns, affectedServicesIns, effectPeriodsIns = self.testArchiver.buildAlertInsertions(sampleAlertsDict)
+        testArchiver = mbtaalerts.archiver.Archiver()
+        alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDict)
         self.assertEqual(self.getNumInsertions(alertsIns), 1)
         self.assertEqual(self.getNumInsertions(affectedServicesIns), 1)
         self.assertEqual(self.getNumInsertions(effectPeriodsIns), 1)
+
+    def testIgnoreDuplicate(self):
+        sampleAlerts = """{"alerts":
+        [{"alert_id":7,
+        "effect_name":"Delay",
+        "effect":"OTHER_EFFECT",
+        "cause":"UNKNOWN_CAUSE",
+        "header_text":"Fitchburg Train 415 (3:30 pm from N. Station) has departed N. Station & is operating 10-20 minutes late en route to Wachusett due to an earlier mechanical issue.",
+        "short_header_text":"Fitchburg Train 415 (3:30pm from N Station) has departed N Station & is operating 10-20 minutes late en route to Wachusett","description_text":"Affected direction: Outbound",
+        "severity":"Moderate",
+        "created_dt":"1489693393",
+        "last_modified_dt":"1489693996",
+        "service_effect_text":"Fitchburg Line delay",
+        "alert_lifecycle":"New",
+        "effect_periods":
+            [{"effect_start":"1489693384",
+            "effect_end":""}],
+        "affected_services":
+            {"services":
+                [
+                {"route_type":"2", "mode_name":"Commuter Rail","route_id":"CR-Fitchburg", "route_name":"Fitchburg Line","direction_id":"0","direction_name":"Outbound","trip_id":"CR-Weekday-Fall-16-415","trip_name":"415 (3:30 pm from North Station)"}
+                ],
+            "elevators":
+                []
+        }}]}"""
+
+        sampleAlertsDupe = """{"alerts":
+        [{"alert_id":7,
+        "effect_name":"Delay",
+        "effect":"OTHER_EFFECT",
+        "cause":"UNKNOWN_CAUSE",
+        "header_text":"Fitchburg Train 415 (3:30 pm from N. Station) has departed N. Station & is operating 10-20 minutes late en route to Wachusett due to an earlier mechanical issue.",
+        "short_header_text":"Fitchburg Train 415 (3:30pm from N Station) has departed N Station & is operating 10-20 minutes late en route to Wachusett","description_text":"Affected direction: Outbound",
+        "severity":"Moderate",
+        "created_dt":"1489693393",
+        "last_modified_dt":"1489693996",
+        "service_effect_text":"Fitchburg Line delay",
+        "alert_lifecycle":"New",
+        "effect_periods":
+            [{"effect_start":"1489693384",
+            "effect_end":""}],
+        "affected_services":
+            {"services":
+                [
+                {"route_type":"2", "mode_name":"Commuter Rail","route_id":"CR-Fitchburg", "route_name":"Fitchburg Line","direction_id":"0","direction_name":"Outbound","trip_id":"CR-Weekday-Fall-16-415","trip_name":"415 (3:30 pm from North Station)"}
+                ],
+            "elevators":
+                []
+        }}]}"""
+        sampleAlertsDict = ast.literal_eval(sampleAlerts)
+        sampleAlertsDupeDict = ast.literal_eval(sampleAlertsDupe)
+        testArchiver = mbtaalerts.archiver.Archiver()
+        testArchiver.buildAlertInsertions(sampleAlertsDict)
+        alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDupeDict)
+        self.assertEqual(self.getNumInsertions(alertsIns), 0)
+        self.assertEqual(self.getNumInsertions(affectedServicesIns), 0)
+        self.assertEqual(self.getNumInsertions(effectPeriodsIns), 0)
+
+    def testInsertUpdate(self):
+        sampleAlerts = """{"alerts":
+        [{"alert_id":7,
+        "effect_name":"Delay",
+        "effect":"OTHER_EFFECT",
+        "cause":"UNKNOWN_CAUSE",
+        "header_text":"Fitchburg Train 415 (3:30 pm from N. Station) has departed N. Station & is operating 10-20 minutes late en route to Wachusett due to an earlier mechanical issue.",
+        "short_header_text":"Fitchburg Train 415 (3:30pm from N Station) has departed N Station & is operating 10-20 minutes late en route to Wachusett","description_text":"Affected direction: Outbound",
+        "severity":"Moderate",
+        "created_dt":"1489693393",
+        "last_modified_dt":"1489693996",
+        "service_effect_text":"Fitchburg Line delay",
+        "alert_lifecycle":"New",
+        "effect_periods":
+            [{"effect_start":"1489693384",
+            "effect_end":""}],
+        "affected_services":
+            {"services":
+                [
+                {"route_type":"2", "mode_name":"Commuter Rail","route_id":"CR-Fitchburg", "route_name":"Fitchburg Line","direction_id":"0","direction_name":"Outbound","trip_id":"CR-Weekday-Fall-16-415","trip_name":"415 (3:30 pm from North Station)"}
+                ],
+            "elevators":
+                []
+        }}]}"""
+
+        sampleAlertsDupe = """{"alerts":
+        [{"alert_id":7,
+        "effect_name":"Delay",
+        "effect":"OTHER_EFFECT",
+        "cause":"UNKNOWN_CAUSE",
+        "header_text":"Fitchburg Train 415 (3:30 pm from N. Station) has departed N. Station & is operating 10-20 minutes late en route to Wachusett due to an earlier mechanical issue.",
+        "short_header_text":"Fitchburg Train 415 (3:30pm from N Station) has departed N Station & is operating 10-20 minutes late en route to Wachusett","description_text":"Affected direction: Outbound",
+        "severity":"Moderate",
+        "created_dt":"1489693393",
+        "last_modified_dt":"1489693998",
+        "service_effect_text":"Fitchburg Line delay",
+        "alert_lifecycle":"New",
+        "effect_periods":
+            [{"effect_start":"1489693384",
+            "effect_end":""}],
+        "affected_services":
+            {"services":
+                [
+                {"route_type":"2", "mode_name":"Commuter Rail","route_id":"CR-Fitchburg", "route_name":"Fitchburg Line","direction_id":"0","direction_name":"Outbound","trip_id":"CR-Weekday-Fall-16-415","trip_name":"415 (3:30 pm from North Station)"}
+                ],
+            "elevators":
+                []
+        }}]}"""
+        sampleAlertsDict = ast.literal_eval(sampleAlerts)
+        sampleAlertsDupeDict = ast.literal_eval(sampleAlertsDupe)
+        testArchiver = mbtaalerts.archiver.Archiver()
+        testArchiver.buildAlertInsertions(sampleAlertsDict)
+        alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDupeDict)
+        self.assertEqual(self.getNumInsertions(alertsIns), 1)
+        self.assertEqual(self.getNumInsertions(affectedServicesIns), 0)
+        self.assertEqual(self.getNumInsertions(effectPeriodsIns), 0)
