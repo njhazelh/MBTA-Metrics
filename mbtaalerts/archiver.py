@@ -12,9 +12,8 @@ import requests
 import configparser
 import sqlalchemy
 from sqlalchemy import MetaData, Table
+from sqlalchemy.exc import DBAPIError
 from datetime import datetime, timezone
-
-SCAN_INTERVAL_SECONDS = 60
 
 logging.basicConfig(
     format='%(asctime)s %(name)s %(levelname)s %(message)s',
@@ -95,18 +94,21 @@ def buildEffectPeriodsEntry(alert_id, effectPeriod):
 class Archiver:
     """The archiver takes in raw alert data and stores it in the database."""
 
-    # The sqlalchemy connection to our postgres database
-    connection = None
-
-    # Table metadata loaded from the database schema
-    alerts_table = None
-    affected_services_table = None
-    effect_periods_table = None
-
-    known_id_lastmodified_pairs = []
+    SCAN_INTERVAL_SECONDS = 60
 
     def __init__(self):
-        self.known_id_lastmodified_pairs = []
+
+        # Record each version of published alerts we've seen,
+        # as a set of (alert_id, last_modified_dt)
+        self.known_id_lastmodified_pairs = set()
+
+        # The sqlalchemy connection to our postgres database
+        self.connection = None
+
+        # Table metadata loaded from the database schema
+        self.alerts_table = None
+        self.affected_services_table = None
+        self.effect_periods_table = None
 
     def initializeTableMetadata(self):
         """Load the table schemas and store them for later.."""
@@ -152,50 +154,55 @@ class Archiver:
                     # A commuter rail alert may (rarely) not have a route_id
                     if affected_service.get('route_id'):
                         service_entry = buildServicesEntry(alert_id, affected_service)
-
-                    service_insertions.append(service_entry)
+                        service_insertions.append(service_entry)
 
             # Only process commuter rail alerts
             if commuter:
-                is_update = False
-                is_duplicate = False
-
-                # Find existing alerts that match this ID
-                last_modified = datetime.fromtimestamp(int(alert['last_modified_dt']), timezone.utc)
-                last_modified = last_modified.replace(tzinfo=None)
-
-                # If there were ID matches, check whether this alert is an
-                # update (newer modified date) or a duplicate (same modified date)
-                for known_id_lastmodified in self.known_id_lastmodified_pairs:
-
-                    known_id = known_id_lastmodified[0]
-                    known_lastmodified = known_id_lastmodified[1]
-
-                    if known_id == alert_id:
-                        if known_lastmodified == last_modified:
-                            is_duplicate = True
-                        else:
-                            is_update = True
-
-                # Ignore duplicate alerts
-                if not is_duplicate:
-
-                    LOG.info("Adding alert with ID " + alert_id)
-
-                    alert_entry = buildAlertEntry(alert)
-                    alert_insertions.append(alert_entry)
-                    self.known_id_lastmodified_pairs.append((alert_id, last_modified))
-
-                    if not is_update:
-                        # Record this alert's associated effect periods
-                        for effect_period in alert['effect_periods']:
-                            effect_period_entry = buildEffectPeriodsEntry(alert_id, effect_period)
-                            periods_insert_batch.append(effect_period_entry)
-
-                        # Add all of the affected services we recorded earlier
-                        services_insert_batch.extend(service_insertions)
+                self.processCommuterAlert(alert, alert_insertions, service_insertions, services_insert_batch, periods_insert_batch)
 
         return alert_insertions, services_insert_batch, periods_insert_batch
+
+    def processCommuterAlert(self, alert, alert_insertions, service_insertions, services_insert_batch, periods_insert_batch):
+        alert_id = str(alert['alert_id'])
+        is_update = False
+        is_duplicate = False
+
+        # Find existing alerts that match this ID
+        last_modified = datetime.fromtimestamp(int(alert['last_modified_dt']), timezone.utc)
+        last_modified = last_modified.replace(tzinfo=None)
+
+        # If there were ID matches, check whether this alert is an
+        # update (newer modified date) or a duplicate (same modified date)
+        for known_id_lastmodified in self.known_id_lastmodified_pairs:
+
+            known_id = known_id_lastmodified[0]
+            known_lastmodified = known_id_lastmodified[1]
+
+            if known_id == alert_id:
+                if known_lastmodified == last_modified:
+                    is_duplicate = True
+                else:
+                    is_update = True
+
+        # Ignore duplicate alerts
+        if not is_duplicate:
+
+            LOG.info("Adding alert with ID " + alert_id)
+
+            # Mark this alert version as 'seen' before processing it,
+            # so we don't get stuck re-processing it if it fails
+            self.known_id_lastmodified_pairs.add((alert_id, last_modified))
+            alert_entry = buildAlertEntry(alert)
+            alert_insertions.append(alert_entry)
+            
+            if not is_update:
+                # Record this alert's associated effect periods
+                for effect_period in alert['effect_periods']:
+                    effect_period_entry = buildEffectPeriodsEntry(alert_id, effect_period)
+                    periods_insert_batch.append(effect_period_entry)
+
+                # Add all of the affected services we recorded earlier
+                services_insert_batch.extend(service_insertions)
 
     def performInsertions(self, alert_insertions, service_insertions, effect_period_insertions):
         """Executes the insertions into the database"""
@@ -204,13 +211,13 @@ class Archiver:
         new_periods_num = len(effect_period_insertions)
 
         if new_alerts_num > 0:
-            LOG.info("Inserting " + str(new_alerts_num) + " alerts.")
+            LOG.info("Inserting %d alerts.", new_alerts_num)
             self.connection.execute(self.alerts_table.insert(), alert_insertions)
         if new_services_num > 0:
-            LOG.info("Inserting " + str(new_services_num) + " affected services.")
+            LOG.info("Inserting %d affected services.", new_services_num)
             self.connection.execute(self.affected_services_table.insert(), service_insertions)
         if new_periods_num > 0:
-            LOG.info("Inserting " + str(new_periods_num) + " alert effect periods.")
+            LOG.info("Inserting %d alert affect periods.", new_periods_num)
             self.connection.execute(self.effect_periods_table.insert(), effect_period_insertions)
 
 def main():
@@ -230,14 +237,28 @@ def main():
         request_url += "include_service_alerts=true&"
         request_url += "format=json"
 
-        response = requests.get(request_url)
-        alerts_info = response.json()
-        archiver.doUpdateAlerts(alerts_info)
+        try:
+            response = requests.get(request_url)
+            alerts_info = response.json()
+            archiver.doUpdateAlerts(alerts_info)
+
+        # We should continue scanning, since this may
+        # just indicate a temporary API outage
+        except requests.ConnectionError as conn_err:
+            logging.exception("Unable to retrieve alerts data from API")
+
+        # The below two exceptions should only occur after the
+        # problematic alerts are marked as "known", so it's safe
+        # to continue scanning (we won't get stuck re-processing them)
+        except KeyError as ky_err:
+            logging.exception("Couldn't find required field in alerts response")
+        except DBAPIError as db_err:
+            logging.exception("Encountered an error when performing database insertion")
 
         LOG.info("Finished scanning new alerts.")
 
         # Sleep for 1 minute
-        time.sleep(SCAN_INTERVAL_SECONDS)
+        time.sleep(archiver.SCAN_INTERVAL_SECONDS)
 
 if __name__ == "__main__":
     main()
