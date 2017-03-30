@@ -13,3 +13,4 @@ class AlertObj:
 class event:
     def __init__(self, json):
         self.event = json
+
