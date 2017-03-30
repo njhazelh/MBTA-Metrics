@@ -170,12 +170,13 @@ class Archiver:
         service_insertions, services_insert_batch, periods_insert_batch):
         """Build and add the insertions for a single CR alert"""
         alert_id = str(alert['alert_id'])
-        is_update = False
-        is_duplicate = False
-
+        
         # Find existing alerts that match this ID
         last_modified = datetime.fromtimestamp(int(alert['last_modified_dt']), timezone.utc)
         last_modified = last_modified.replace(tzinfo=None)
+
+        id_exists = False
+        is_duplicate = False
 
         # If there were ID matches, check whether this alert is an
         # update (newer modified date) or a duplicate (same modified date)
@@ -185,10 +186,10 @@ class Archiver:
             known_lastmodified = known_id_lastmodified[1]
 
             if known_id == alert_id:
+                id_exists = True
+
                 if known_lastmodified == last_modified:
                     is_duplicate = True
-                else:
-                    is_update = True
 
         # Ignore duplicate alerts
         if not is_duplicate:
@@ -200,8 +201,10 @@ class Archiver:
             self.known_id_lastmodified_pairs.add((alert_id, last_modified))
             alert_entry = buildAlertEntry(alert)
             alert_insertions.append(alert_entry)
-            
-            if not is_update:
+
+            if not id_exists:
+                # This is a brand new alert
+
                 # Record this alert's associated effect periods
                 for effect_period in alert['effect_periods']:
                     effect_period_entry = buildEffectPeriodsEntry(alert_id, effect_period)
