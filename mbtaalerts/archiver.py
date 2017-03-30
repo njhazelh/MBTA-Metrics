@@ -148,21 +148,27 @@ class Archiver:
             # Check whether this alert affects any commuter rail services
             for affected_service in alert['affected_services']['services']:
                 mode_name = affected_service.get('mode_name')
+
                 if mode_name == 'Commuter Rail':
                     commuter = True
 
-                    # A commuter rail alert may (rarely) not have a route_id
+                    # A CR affected service entry may (rarely) not have a route_id,
+                    # for example during severe-weather broadcast alerts.
+                    # Store the alert anyways, but only store the affected services with a route_id.
                     if affected_service.get('route_id'):
                         service_entry = buildServicesEntry(alert_id, affected_service)
                         service_insertions.append(service_entry)
 
             # Only process commuter rail alerts
             if commuter:
-                self.processCommuterAlert(alert, alert_insertions, service_insertions, services_insert_batch, periods_insert_batch)
+                self.processCommuterAlert(alert, alert_insertions, service_insertions,  \
+                    services_insert_batch, periods_insert_batch)
 
         return alert_insertions, services_insert_batch, periods_insert_batch
 
-    def processCommuterAlert(self, alert, alert_insertions, service_insertions, services_insert_batch, periods_insert_batch):
+    def processCommuterAlert(self, alert, alert_insertions,                             \
+        service_insertions, services_insert_batch, periods_insert_batch):
+        """Build and add the insertions for a single CR alert"""
         alert_id = str(alert['alert_id'])
         is_update = False
         is_duplicate = False

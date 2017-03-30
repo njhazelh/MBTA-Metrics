@@ -53,7 +53,7 @@ class ArchiverTest(unittest.TestCase):
         self.assertEqual(alertsIns[0].get("alert_id"), "7")
         self.assertEqual(affectedServicesIns[0].get("trip_id"), "CR-Weekday-Fall-16-415")
 
-    def testIgnoreNoneRouteId(self):
+    def testNoneRouteId(self):
 
         sampleAlerts = """{"alerts":
         [{"alert_id":7,
@@ -87,7 +87,7 @@ class ArchiverTest(unittest.TestCase):
         sampleAlertsDict = ast.literal_eval(sampleAlerts)
         testArchiver = mbtaalerts.archiver.Archiver()
         alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDict)
-        self.assertEqual(self.getNumInsertions(alertsIns), 0)
+        self.assertEqual(self.getNumInsertions(alertsIns), 1)
 
     def testAcceptMixedServiceAlert(self):
         sampleAlerts = """{"alerts":
