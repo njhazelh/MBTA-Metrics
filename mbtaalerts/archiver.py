@@ -84,6 +84,12 @@ class Archiver:
         # Load the length of time (seconds) to wait between scans
         self.scan_frequency_sec = directed_config.getint("Archiver", "scan_frequency_sec")
 
+        # How often (every n scans) should we clear the known-alerts set
+        self.cull_frequency = directed_config.getint("Archiver", "cull_frequency")
+
+        # How many cycles until the next cull?
+        self.next_cull = self.cull_frequency
+
         # Record each version of published alerts we've seen,
         # as a set of (alert_id, last_modified_dt)
         self.known_id_lastmodified_pairs = set()
@@ -158,8 +164,8 @@ class Archiver:
         alert_id = str(alert['alert_id'])
         
         # Find existing alerts that match this ID
-        last_modified = datetime.fromtimestamp(int(alert['last_modified_dt']), timezone.utc)
-        last_modified = last_modified.replace(tzinfo=None)
+        last_modified = (datetime.fromtimestamp(int(alert['last_modified_dt']), \
+            timezone.utc)).replace(tzinfo=None)
 
         id_exists = False
         is_duplicate = False
@@ -215,6 +221,36 @@ class Archiver:
             LOG.info("Inserting %d alert affect periods.", new_periods_num)
             self.connection.execute(self.effect_periods_table.insert(), effect_period_insertions)
 
+    def maintainKnownAlerts(self, alerts_info):
+        """Remove unpublished alerts from the known alert set"""
+
+        if self.next_cull == 0:
+            self.next_cull = self.cull_frequency
+
+            items_to_cull = []
+            published_alerts = alerts_info['alerts']
+
+            # Look through our currently-known alert versions
+            for known_id_lastmodified in self.known_id_lastmodified_pairs:
+                cull_known_pair = True
+
+                # Save this pair if there's an active alert with its ID
+                for published_alert in published_alerts:
+                    published_alert_id = str(published_alert['alert_id'])
+                    if known_id_lastmodified[0] == published_alert_id:
+                        cull_known_pair = False
+
+                if cull_known_pair:
+                    items_to_cull.append(known_id_lastmodified)
+
+            # Remove the pairs from our set which have currently-published IDs
+            for pair in items_to_cull:
+                self.known_id_lastmodified_pairs.discard(pair)
+
+            LOG.info("Purging %d unpublished alerts from known alert set", len(items_to_cull))
+        else:
+            self.next_cull -= 1
+
 def main():
 
     """
@@ -224,6 +260,7 @@ def main():
     archiver.initializeTableMetadata()
 
     while True:
+
         LOG.info("Scanning for new alerts")
 
         alerts_url = directed_config.get("API", "alerts_url")
@@ -239,6 +276,8 @@ def main():
         try:
             response = requests.get(alerts_url, params=alerts_params)
             alerts_info = response.json()
+
+            archiver.maintainKnownAlerts(alerts_info)
             archiver.doUpdateAlerts(alerts_info)
 
         # We should continue scanning, since this may
