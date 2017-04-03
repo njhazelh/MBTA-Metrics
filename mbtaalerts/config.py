@@ -28,13 +28,3 @@ except KeyError as ky_err:
 
 directed_config = configparser.ConfigParser()
 directed_config.read(mbta_config_path)
-
-def get(section, key):
-    """Pass the call down to configparser"""
-    return directed_config.get(section, key)
-
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()

@@ -1,6 +1,6 @@
 import enum
 import logging
-import mbtaalerts.config as mbta_config
+from mbtaalerts.config import directed_config
 from mbtaalerts.database import populate
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData, \
@@ -20,11 +20,11 @@ def databaseConnect():
     """Load database config settings and connect"""
 
     # read settings through the configurator
-    host = mbta_config.get('Database', 'host')
-    port = mbta_config.get('Database', 'port')
-    db = mbta_config.get('Database', 'db')
-    user = mbta_config.get('Database', 'user')
-    passwd = mbta_config.get('Database', 'pass')
+    host = directed_config.get('Database', 'host')
+    port = directed_config.get('Database', 'port')
+    db = directed_config.get('Database', 'db')
+    user = directed_config.get('Database', 'user')
+    passwd = directed_config.get('Database', 'pass')
 
     engine = sqlalchemy.create_engine('postgresql://' + user + ':' + passwd + '@'
                                       + host + ':' + port + '/' + db)

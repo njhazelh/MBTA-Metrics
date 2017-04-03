@@ -9,7 +9,7 @@ import logging
 import time
 import requests
 
-import mbtaalerts.config as mbta_config
+from mbtaalerts.config import directed_config
 from mbtaalerts.database import database
 from sqlalchemy import MetaData, Table
 from sqlalchemy.exc import DBAPIError
@@ -80,6 +80,9 @@ class Archiver:
     """The archiver takes in raw alert data and stores it in the database."""
 
     def __init__(self):
+
+        # Load the length of time (seconds) to wait between scans
+        self.scan_frequency_sec = directed_config.getint("Archiver", "scan_frequency_sec")
 
         # Record each version of published alerts we've seen,
         # as a set of (alert_id, last_modified_dt)
@@ -223,13 +226,13 @@ def main():
     while True:
         LOG.info("Scanning for new alerts")
 
-        alerts_url = mbta_config.get("API", "alerts_url")
+        alerts_url = directed_config.get("API", "alerts_url")
 
         # Build parameters for the alerts API call
         alerts_params = {
-            'api_key': mbta_config.get("API", "v2_api_key"),
-            'include_access_alerts': mbta_config.get("Archiver", "include_access_alerts"),
-            'include_service_alerts': mbta_config.get("Archiver", "include_service_alerts"),
+            'api_key': directed_config.get("API", "v2_api_key"),
+            'include_access_alerts': directed_config.get("Archiver", "include_access_alerts"),
+            'include_service_alerts': directed_config.get("Archiver", "include_service_alerts"),
             'format': 'json'
         }
 
@@ -253,8 +256,8 @@ def main():
 
         LOG.info("Finished scanning new alerts.")
 
-        # Sleep for 1 minute
-        time.sleep(int(mbta_config.get("Archiver", "scan_frequency_sec")))
+        # Sleep until the next scan
+        time.sleep(archiver.scan_frequency_sec)
 
 if __name__ == "__main__":
     main()
