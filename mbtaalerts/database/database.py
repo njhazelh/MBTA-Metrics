@@ -1,22 +1,10 @@
-import configparser
 import enum
 import logging
+import mbtaalerts.config as mbta_config
 from mbtaalerts.database import populate
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, MetaData, \
     ForeignKey, DateTime, Date, Time, Interval, Boolean, CheckConstraint, Enum
-
-logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
-# read from settings file
-config = configparser.ConfigParser()
-config.read("../../settings.cfg")
-host = config.get('Database', 'host')
-port = config.get('Database', 'port')
-db = config.get('Database', 'db')
-user = config.get('Database', 'user')
-passwd = config.get('Database', 'pass')
 
 # enums
 class Direction(enum.Enum):
@@ -28,85 +16,102 @@ class DelayAccuracy(enum.Enum):
     accurate = 1
     high = 2
 
-# create tables
-metadata = MetaData()
+def databaseConnect():
+    """Load database config settings and connect"""
 
-routes = Table('routes', metadata,
-               Column('id', String(32), primary_key=True, unique=True),
-               Column('name', String(32), nullable=False))
+    # read settings through the configurator
+    host = mbta_config.get('Database', 'host')
+    port = mbta_config.get('Database', 'port')
+    db = mbta_config.get('Database', 'db')
+    user = mbta_config.get('Database', 'user')
+    passwd = mbta_config.get('Database', 'pass')
 
-stops = Table('stops', metadata,
-               Column('id', String(32), primary_key=True, unique=True),
-               Column('name', String(32), nullable=False))
+    engine = sqlalchemy.create_engine('postgresql://' + user + ':' + passwd + '@'
+                                      + host + ':' + port + '/' + db)
+    return engine
 
-alert_events = Table('alert_events', metadata,
-                     Column('id', Integer, primary_key=True, autoincrement=True),
-                     Column('trip_id', String(100)),
-                     Column('date', Date),
-                     Column('time', Time),
-                     Column('day', Integer, CheckConstraint('day >= 0 AND day <= 6')),
-                     Column('route', None, ForeignKey("routes.id")),
-                     Column('stop', String(32)),
-                     Column('direction', Enum(Direction)),
-                     Column('short_name', String(64)),
-                     Column('scheduled_departure', DateTime),
-                     Column('actual_departure', DateTime),
-                     Column('delay', Interval),
-                     Column('alert_issued', Boolean),
-                     Column('time', Time),
-                     Column('deserves_alert', Boolean),
-                     Column('alert_delay', Interval),
-                     Column('alert_timely', Boolean),
-                     Column('alert_text', String(300)),
-                     Column('predicted_delay', Interval),
-                     Column('delay_accuracy', Enum(DelayAccuracy))
-                     )
+def main():
 
-alerts = Table('alerts', metadata,
-               Column('alert_id', Integer, primary_key=True),
-               Column('effect_name', String(32)),
-               Column('effect', String(32)),
-               Column('cause', String(64)),
-               Column('header_text', String(256)),
-               Column('short_header_text', String(256)),
-               Column('severity', String(16)),
-               Column('created_dt', DateTime),
-               Column('last_modified_dt', DateTime),
-               Column('service_effect_text', String(256)),
-               Column('alert_lifecycle', String(16))
-               )
+    logging.basicConfig()
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
-alert_effect_period = Table('alert_effect_period', metadata,
-                            Column('id', Integer, primary_key=True, autoincrement=True),
-                            Column('alert_id', None, ForeignKey("alerts.alert_id")),
-                            Column('effect_start', DateTime),
-                            Column('effect_end', DateTime)
-                            )
+    # create tables
+    metadata = MetaData()
 
-alert_affected_services = Table('alert_affected_services', metadata,
+    routes = Table('routes', metadata,
+                   Column('id', String(32), primary_key=True, unique=True),
+                   Column('name', String(32), nullable=False))
+
+    stops = Table('stops', metadata,
+                   Column('id', String(32), primary_key=True, unique=True),
+                   Column('name', String(32), nullable=False))
+
+    alert_events = Table('alert_events', metadata,
+                         Column('id', Integer, primary_key=True, autoincrement=True),
+                         Column('trip_id', String(100)),
+                         Column('date', Date),
+                         Column('time', Time),
+                         Column('day', Integer, CheckConstraint('day >= 0 AND day <= 6')),
+                         Column('route', None, ForeignKey("routes.id")),
+                         Column('stop', String(32)),
+                         Column('direction', Enum(Direction)),
+                         Column('short_name', String(64)),
+                         Column('scheduled_departure', DateTime),
+                         Column('actual_departure', DateTime),
+                         Column('delay', Interval),
+                         Column('alert_issued', Boolean),
+                         Column('time', Time),
+                         Column('deserves_alert', Boolean),
+                         Column('alert_delay', Interval),
+                         Column('alert_timely', Boolean),
+                         Column('alert_text', String(300)),
+                         Column('predicted_delay', Interval),
+                         Column('delay_accuracy', Enum(DelayAccuracy))
+                         )
+
+    alerts = Table('alerts', metadata,
+                   Column('alert_id', Integer, primary_key=True),
+                   Column('effect_name', String(32)),
+                   Column('effect', String(32)),
+                   Column('cause', String(64)),
+                   Column('header_text', String(256)),
+                   Column('short_header_text', String(256)),
+                   Column('severity', String(16)),
+                   Column('created_dt', DateTime),
+                   Column('last_modified_dt', DateTime),
+                   Column('service_effect_text', String(256)),
+                   Column('alert_lifecycle', String(16))
+                   )
+
+    alert_effect_period = Table('alert_effect_period', metadata,
                                 Column('id', Integer, primary_key=True, autoincrement=True),
                                 Column('alert_id', None, ForeignKey("alerts.alert_id")),
-                                Column('route_id', None, ForeignKey("routes.id")),
-                                Column('trip_id', String(64)),
-                                Column('trip_name', String(64))
+                                Column('effect_start', DateTime),
+                                Column('effect_end', DateTime)
                                 )
 
-# create tables if they don't exist
-engine = sqlalchemy.create_engine('postgresql://' + user + ':' + passwd + '@'
-                                  + host + ':' + port + '/' + db)
+    alert_affected_services = Table('alert_affected_services', metadata,
+                                    Column('id', Integer, primary_key=True, autoincrement=True),
+                                    Column('alert_id', None, ForeignKey("alerts.alert_id")),
+                                    Column('route_id', None, ForeignKey("routes.id")),
+                                    Column('trip_id', String(64)),
+                                    Column('trip_name', String(64))
+                                    )
 
-connection = engine.connect()
-metadata.create_all(engine)
+    engine = databaseConnect()
 
-# populate routes table
-cr_routes = populate.routes()
-for item in cr_routes:
-    values = {'id': item.get('route_id'), 'name': item.get('route_name')}
-    insert_route = sqlalchemy.insert(routes, values=values)
-    connection.execute(insert_route)
+    # create tables if they don't exist
+    connection = engine.connect()
+    metadata.create_all(engine)
 
-connection.close()
+    # populate routes table
+    cr_routes = populate.routes()
+    for item in cr_routes:
+        values = {'id': item.get('route_id'), 'name': item.get('route_name')}
+        insert_route = sqlalchemy.insert(routes, values=values)
+        connection.execute(insert_route)
 
+    connection.close()
 
-
-
+if __name__ == "__main__":
+    main()

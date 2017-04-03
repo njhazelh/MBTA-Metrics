@@ -11,6 +11,7 @@ import requests
 
 import configparser
 import sqlalchemy
+from mbtaalerts.database import database
 from sqlalchemy import MetaData, Table
 from sqlalchemy.exc import DBAPIError
 from datetime import datetime, timezone
@@ -20,21 +21,6 @@ logging.basicConfig(
     datefmt='%m/%d %H:%M:%S',
     level=os.environ.get("LOGLEVEL", "INFO"))
 LOG = logging.getLogger("archive")
-
-def databaseConnect():
-    """Load database config settings and connect"""
-    config = configparser.ConfigParser()
-    config.read("settings.cfg")
-    host = config.get('Database', 'host')
-    port = config.get('Database', 'port')
-    db = config.get('Database', 'db')
-    user = config.get('Database', 'user')
-    passwd = config.get('Database', 'pass')
-
-    engine = sqlalchemy.create_engine('postgresql://' + user + ':' + passwd + '@'
-                                      + host + ':' + port + '/' + db)
-
-    return engine
 
 def buildAlertEntry(alert):
     """Build a database insertion from alert data"""
@@ -112,7 +98,7 @@ class Archiver:
 
     def initializeTableMetadata(self):
         """Load the table schemas and store them for later.."""
-        engine = databaseConnect()
+        engine = database.databaseConnect()
         metadata = MetaData(bind=engine)
 
         self.connection = engine.connect()
