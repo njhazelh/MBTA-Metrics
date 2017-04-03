@@ -10,7 +10,7 @@ pipeline {
                         rm -rf mbta-env/
                     fi
                     . ./bin/activate.sh
-                    python3 -m nose2 -c unittest.cfg
+                    CONFIG='/etc/mbtaalerts/settings_test.cfg' python3 -m nose2 -c unittest.cfg
                 '''
                 script {
                     def lintErr = sh script: '''#!/bin/bash
