@@ -9,8 +9,7 @@ import logging
 import time
 import requests
 
-import configparser
-import sqlalchemy
+import mbtaalerts.config as mbta_config
 from mbtaalerts.database import database
 from sqlalchemy import MetaData, Table
 from sqlalchemy.exc import DBAPIError
@@ -79,8 +78,6 @@ def buildEffectPeriodsEntry(alert_id, effectPeriod):
 
 class Archiver:
     """The archiver takes in raw alert data and stores it in the database."""
-
-    SCAN_INTERVAL_SECONDS = 60
 
     def __init__(self):
 
@@ -226,34 +223,38 @@ def main():
     while True:
         LOG.info("Scanning for new alerts")
 
-        request_url = "http://realtime.mbta.com/developer/api/v2/alerts?"
-        request_url += "api_key=wX9NwuHnZU2ToO7GmGR9uw&"
-        request_url += "include_access_alerts=false&"
-        request_url += "include_service_alerts=true&"
-        request_url += "format=json"
+        alerts_url = mbta_config.get("API", "alerts_url")
+
+        # Build parameters for the alerts API call
+        alerts_params = {
+            'api_key': mbta_config.get("API", "v2_api_key"),
+            'include_access_alerts': mbta_config.get("Archiver", "include_access_alerts"),
+            'include_service_alerts': mbta_config.get("Archiver", "include_service_alerts"),
+            'format': 'json'
+        }
 
         try:
-            response = requests.get(request_url)
+            response = requests.get(alerts_url, params=alerts_params)
             alerts_info = response.json()
             archiver.doUpdateAlerts(alerts_info)
 
         # We should continue scanning, since this may
         # just indicate a temporary API outage
-        except requests.ConnectionError as conn_err:
+        except requests.ConnectionError:
             logging.exception("Unable to retrieve alerts data from API")
 
         # The below two exceptions should only occur after the
         # problematic alerts are marked as "known", so it's safe
         # to continue scanning (we won't get stuck re-processing them)
-        except KeyError as ky_err:
+        except KeyError:
             logging.exception("Couldn't find required field in alerts response")
-        except DBAPIError as db_err:
+        except DBAPIError:
             logging.exception("Encountered an error when performing database insertion")
 
         LOG.info("Finished scanning new alerts.")
 
         # Sleep for 1 minute
-        time.sleep(archiver.SCAN_INTERVAL_SECONDS)
+        time.sleep(int(mbta_config.get("Archiver", "scan_frequency_sec")))
 
 if __name__ == "__main__":
     main()
