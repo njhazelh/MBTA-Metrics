@@ -17,7 +17,7 @@ export default class DirectionSelector extends React.Component {
               <Row>
                 {
                   directions.map(direction =>
-                    <Col key={direction} xs={3}>
+                    <Col key={direction} md={6}>
                       <Input type='checkbox' name={direction}/>
                       <Label for={direction}>{direction}</Label>
                     </Col>
