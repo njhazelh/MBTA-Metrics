@@ -2,9 +2,13 @@ import React from 'react';
 
 import { Row, Col } from 'reactstrap';
 
+import AccuracyChart from './AccuracyChart';
+import ExistenceChart from './ExistenceChart';
+import TimelinessChart from './TimelinessChart';
+
 export default () =>
-  <Row  className='my-5 justify-content-center'>
-    <Col lg={4}><div style={{width:'300px', height:'300px', backgroundColor:'red', margin: '5px auto'}}>Existence</div></Col>
-    <Col lg={4}><div style={{width:'300px', height:'300px', backgroundColor:'red', margin: '5px auto'}}>Timeliness</div></Col>
-    <Col lg={4}><div style={{width:'300px', height:'300px', backgroundColor:'red', margin: '5px auto'}}>Accuracy</div></Col>
+  <Row className='my-3 justify-content-center'>
+    <Col lg={4} md={6} sm={12} className='my-3'><ExistenceChart/></Col>
+    <Col lg={4} md={6} sm={12} className='my-3'><TimelinessChart/></Col>
+    <Col lg={4} md={6} sm={12} className='my-3'><AccuracyChart/></Col>
   </Row>;
