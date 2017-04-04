@@ -1,6 +1,30 @@
 [Database]
-host = somehost
-port = someport
-db = somedb
-user = someuser
-pass = somepass
+host:
+port:
+db:
+user:
+pass:
+
+;; This combines the info above to hit a postgres datebase
+;; database_url: postgresql://%(user)s:%(pass)s@%(host)s:%(port)s/%(db)s
+
+;; This goes to an in-memory transient database
+database_url = sqlite://
+
+;; This goes a file
+;; database_url: sqlite:///database.db
+
+[API]
+alerts_url: http://realtime.mbta.com/developer/api/v2/alerts
+v2_api_key:
+
+[Archiver]
+scan_frequency_sec: 60
+cull_frequency: 10
+include_access_alerts: false
+include_service_alerts: true
+
+[Logging]
+format: %%(asctime)s %%(name)s %%(levelname)s %%(message)s
+datefmt: %%m/%%d %%H:%%M:%%S
+level: INFO
