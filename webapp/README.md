@@ -78,7 +78,7 @@ The dashboard is a single page application, which loads *A LOT* of JavaScript an
 other resources up front.  This isn't a problem for most modern computers/phones considering
 that you perform several optimizations.
 
-#### Production Optimization
+##### Production Optimization
 The `yarn build:prod` script will perform a variety of different optimizations to reduce
 the uncompressed size of resources.  For example, it will minimize whitespace in javascript.
 
