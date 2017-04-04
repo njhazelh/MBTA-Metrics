@@ -4,7 +4,7 @@ import PageHeader from './PageHeader';
 import PageFooter from './PageFooter';
 
 export default props =>
-  <div className="app">
+  <div className="app" style={{minWidth:320}}>
     <PageHeader/>
     { props.children }
     <PageFooter/>

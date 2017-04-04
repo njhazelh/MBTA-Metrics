@@ -2,7 +2,7 @@ import React from 'react';
 import { Container } from 'reactstrap';
 
 export default () =>
-  <Container>
+  <Container className="mt-3">
     <h1>Welcome to the MTBA Alert Metrics page</h1>
     <div className='lead'>
       <p>
