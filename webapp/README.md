@@ -37,8 +37,6 @@ yarn lint:fix
 ```
 
 ## Deployment
-**Work in Progress**
-
 ```bash
 webpack build:prod
 <copy to webserver>
