@@ -4,7 +4,8 @@ APPNAME=mbta-archiver
 LOGFILE="/var/log/mbta/${APPNAME}.log"
 PIDFILE="/var/run/mbta/${APPNAME}.pid"
 USER="mbta-app"
-SCRIPT="python -m mbtaalerts.archiver"
+PROD_CONFIG="/etc/mbtaalerts/settings.cfg"
+SCRIPT="CONFIG=$PROD_CONFIG python -m mbtaalerts.archiver"
 
 start() {
     echo "Starting $APPNAME" >&2

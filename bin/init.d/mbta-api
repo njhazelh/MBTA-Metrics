@@ -4,7 +4,8 @@ APPNAME=mbta-api
 LOGFILE="/var/log/mbta/${APPNAME}.log"
 PIDFILE="/var/run/mbta/${APPNAME}.pid"
 USER="mbta-app"
-SCRIPT="gunicorn -w 4 -b 0.0.0.0:9000 mbtaalerts.api:APP"
+PROD_CONFIG=/etc/mbtaalerts/settings.cfg
+SCRIPT="CONFIG=$PROD_CONFIG gunicorn -w 4 -b 0.0.0.0:9000 mbtaalerts.api:APP"
 
 start() {
     echo "Starting $APPNAME" >&2

@@ -11,8 +11,6 @@ import store from '../store';
 import { loadActionEvents } from '../actions/alertEvent-actions';
 import * as alertEventApi from '../api/alertEvents';
 
-import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
-
 import { Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem, NavLink } from 'reactstrap';
 import { Container, Row, Col } from 'reactstrap';
 
