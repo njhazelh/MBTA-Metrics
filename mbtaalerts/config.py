@@ -7,5 +7,5 @@ a production config, dev config, tests config)
 import configparser
 import os
 
-directed_config = configparser.ConfigParser()
-directed_config.read(os.getenv("CONFIG", "settings.cfg"))
+config = configparser.ConfigParser()
+config.read(os.getenv("CONFIG", "settings.cfg"))

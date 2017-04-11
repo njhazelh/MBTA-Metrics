@@ -9,7 +9,7 @@ import time
 import requests
 
 from mbtaalerts.logging import get_log
-from mbtaalerts.config import directed_config as cfg
+from mbtaalerts.config import config as cfg
 from mbtaalerts.database import database as db
 from sqlalchemy import MetaData, Table
 from sqlalchemy.exc import DBAPIError
