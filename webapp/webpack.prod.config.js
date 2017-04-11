@@ -22,7 +22,8 @@ module.exports = {
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 query: {
-                    presets: ['es2015', 'react']
+                    presets: ['es2015', 'react'],
+                    plugins: ['transform-object-rest-spread']
                 }
             },
             {
@@ -35,11 +36,11 @@ module.exports = {
             },
             {
                 test: /\.png$/,
-                loader: "url-loader?limit=100000"
+                loader: "url-loader?prefix=img/limit=100000"
             },
             {
                 test: /\.jpg$/,
-                loader: "file-loader"
+                loader: "url-loader?prefix=img/limit=100000"
             },
             {
                 test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
@@ -69,6 +70,7 @@ module.exports = {
             title: 'MBTA Alert Metrics',
             inject: 'body',
             template: 'src/templates/index.html',
+            favicon: 'src/img/favicon.png'
         }),
         new webpack.DefinePlugin({
            'process.env': {

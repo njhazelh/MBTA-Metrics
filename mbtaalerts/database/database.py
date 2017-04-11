@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, Column, Integer, MetaData
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
-from mbtaalerts.config import directed_config as cfg
+from mbtaalerts.config import config as cfg
 
 ENGINE = create_engine(cfg.get('Database', 'database_url'))
 DB_SESSION = scoped_session(sessionmaker(autocommit=False,

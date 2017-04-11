@@ -10,25 +10,14 @@ import * as alertEventApi from '../api/alertEvents';
 import { Container, Row, Col, Table } from 'reactstrap';
 
 class AlertEventList extends React.Component {
-  componentDidMount() {
-    this.reload();
-  }
-
-  reload() {
-    console.log('loading alert_events');
-    alertEventApi.getAlertEvents();
-  }
-
   render() {
-    if (this.props.alertEvents.length == 0) {
-      return (
-        <Container>
-          <Row className='justify-content-center' style={{textAlign:'center'}}>
-            <Col xs={2}>Loading</Col>
-          </Row>
-        </Container>
-      );
-    }
+    const table = this.props.alertEvents.length === 0
+      ? <tr style={{textAlign:'center'}}>
+          <td colSpan='17' className='py-5'>No Data Loaded</td>
+        </tr>
+      : this.props.alertEvents.map(alertEvent =>
+          <AlertEvent data={alertEvent} key={alertEvent.id}/>
+        );
 
     return (
       <Table responsive striped bordered className='table-sm mt-5'>
@@ -54,11 +43,7 @@ class AlertEventList extends React.Component {
           </tr>
         </thead>
         <tbody>
-          {
-            this.props.alertEvents.map(alertEvent =>
-              <AlertEvent data={alertEvent} key={alertEvent.id}/>
-            )
-          }
+          {table}
         </tbody>
       </Table>
     );

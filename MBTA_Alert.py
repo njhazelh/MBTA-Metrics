@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+ #!/usr/bin/env python
 import urllib
 from urllib.request import urlopen
 import json
@@ -47,6 +47,15 @@ Newburyport_Rockport_line=["Rockport","Gloucester","West Gloucester","Manchester
 Providence_Stoughton_line=["Wickford Junction","TF Green Airport","Providence","South Attleboro","Attleboro",
                             "Mansfield","Sharon","Stoughton","Canton Center","Canton Junction",
                             "Route 128","Hyde Park","Ruggles","Back Bay","South Station"]
+
+mockdata=[["176226", 'CR-Weekday-Fall-16-515'],
+            ["176227", 'CR-Weekday-Fall-16-515'],
+            ["176228", 'CR-Weekday-Fall-16-515'],
+            ["176229", 'CR-Weekday-Fall-16-520'],
+            ["176230", 'CR-Weekday-Fall-16-521'],
+            ["176231", 'CR-Weekday-Fall-16-515']
+
+            ]
 """
 Do the time conversion from real time (yy,m,d,h,m,s)
 """
@@ -57,8 +66,8 @@ def timeConversion():
     
     endTime=datetime.datetime.fromtimestamp(
         int("1457499992")).strftime('%Y-%m-%d %H:%M:%S')
-    unix_start_time=datetime.datetime(2017,3,24,3,0,0).strftime('%s')
-    unix_finish_time = datetime.datetime(2017,3,25,3,0,0).strftime('%s')
+    unix_start_time=datetime.datetime(2017,4,4,3,0,0).strftime('%s')
+    unix_finish_time = datetime.datetime(2017,4,5,3,0,0).strftime('%s')
     return [unix_start_time,unix_finish_time]
 
     #print (startTime)
@@ -106,11 +115,49 @@ def readFromScheduleAdherence():
             stationMiss.append(station)
 
         for i in s:
-            scheduleadherence.append([i["trip_id"] + ", " + i["route_id"] + ", " + i["direction"] + ", " + i["sch_dt"] + ", " + i["act_dt"] + \
+            scheduleadherence.append([i["trip_id"] + ", " + i["route_id"] + ", " + i["direction"] + ", " + i["sch_dt"] + ", " + i["act_dt"] + 
                  i["delay_sec"]])
 
     print (scheduleadherence)
     print (stationMiss) #for error checking purpose
+    return scheduleadherence
+
+
+
+    
+"""
+determine wheter there is an alert issued with the given trioID
+"""
+#def isAlertIssued(trip_id):
+
+"""
+determine wheter a given trip_id deserves alert 
+"""
+#def deserves_alert(trip_id):
+
+"""
+compute the alert deplay time, return the delay time 
+"""
+#def alert_delay():
+
+"""
+compute the timeliness of alert, return the bracket of  alert's timeliness 
+"""
+#def alert_timely():
+
+"""
+parse the alet_message and get the predicted delay 
+"""
+#def get_predicted_delay():
+
+"""
+measure the accuracy of the alert 
+"""
+#def delay_accuray():
+
+
+
+
 """
 Connect to Postgres Database
 """
@@ -132,21 +179,49 @@ def databaseConnect():
     return metadata
 
 """ 
-    Read arhived alert data from the data base
+    Read the data from alert_affected_services table in the database
 """
-def readArchivedData(metadata):
-    alerts=Table('alerts',metadata,autoload=True)
-    s=alerts.select()
+def read_alert_affected_services(metadata):
+
+    alert_affected_services=Table('alert_affected_services',metadata,autoload=True)
+    s=alert_affected_services.select(alert_affected_services.c.trip_id!='None')
     rs=s.execute()
-    row=rs.fetchone()
+    rows=rs.fetchall()
     
-    print (row.id)
-    print (row.alert_id)
-    print (row.effect_name)
+
+    for r in rows:  
+        print(r)
+    #print (row.alert_id)
+    #print (row.effect_name)
  #s = select([self.alerts_table]).where(self.alerts_table.c.alert_id == "344232")
  #   id_matches = self.connection.execute(s)
 
 #   print (s)
+
+"""
+Read the data alet table in the database 
+"""
+
+
+"""
+Create data dictionary for tripID and AlertID, map each tripID to AlertIDs
+"""
+def tripID_to_AlertID():
+    tripID_to_AlertID=dict()
+    
+    for effected_services in mockdata:
+        if effected_services[1] in tripID_to_AlertID:
+            tripID_to_AlertID[effected_services[1]].append(effected_services[0])
+        else:
+            tripID_to_AlertID[effected_services[1]]=[effected_services[0]]
+    print(tripID_to_AlertID)
+
+"""
+Create data dictionary for alet table with key value of aletID
+
+"""
+#def alert_map():
+
 
 """
 Write the result to the database
@@ -172,10 +247,11 @@ def writeToDataBase(metadata):
 
 if __name__=="__main__":
 
-    #readFromScheduleAdherence()
-    metadata=databaseConnect()
-    readArchivedData(metadata)
-    #writeToDataBase(metadata)
+    readFromScheduleAdherence()
 
+    #metadata=databaseConnect()
+    #read_alert_affected_services(metadata)
+    #writeToDataBase(metadata)
+    #tripID_to_AlertID()
 
 
