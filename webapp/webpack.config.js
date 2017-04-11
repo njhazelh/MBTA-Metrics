@@ -37,11 +37,11 @@ module.exports = {
             },
             {
                 test: /\.png$/,
-                loader: "url-loader?limit=100000"
+                loader: "url-loader?prefix=img/limit=100000"
             },
             {
                 test: /\.jpg$/,
-                loader: "file-loader"
+                loader: "url-loader?prefix=img/limit=100000"
             },
             {
                 test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
@@ -75,6 +75,7 @@ module.exports = {
             title: 'MBTA Alert Metrics',
             inject: 'body',
             template: 'src/templates/index.html',
+            favicon: 'src/img/favicon.png'
         }),
     ]
 };
