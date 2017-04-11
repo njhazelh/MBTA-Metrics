@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+
 const path = require('path');
 const webpack = require('webpack');
 
@@ -22,7 +23,8 @@ module.exports = {
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 query: {
-                    presets: ['es2015', 'react']
+                    presets: ['es2015', 'react'],
+                    plugins: ['transform-object-rest-spread']
                 }
             },
             {
