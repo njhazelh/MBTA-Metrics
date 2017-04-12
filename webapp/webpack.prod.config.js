@@ -4,10 +4,12 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    entry: './index.js',
+    entry: {
+      app: './index.js'
+    },
     output: {
         path: path.join(__dirname, 'dist'),
-        filename: '[hash].bundle.js',
+        filename: '[chunkhash].[name].js',
     },
     resolve: {
       extensions: ['.js', '.jsx'],
@@ -76,6 +78,12 @@ module.exports = {
            'process.env': {
                NODE_ENV: JSON.stringify('production'),
             }
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+          name: "commons",
+          minChunks: function (module) {
+             return module.context && module.context.indexOf('node_modules') !== -1;
+          }
         }),
         new webpack.optimize.UglifyJsPlugin(),
     ]
