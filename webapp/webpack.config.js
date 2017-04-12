@@ -5,10 +5,12 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    entry: './index.js',
+    entry: {
+      app: './index.js'
+    },
     output: {
         path: path.join(__dirname, 'dist'),
-        filename: '[hash].bundle.js',
+        filename: '[chunkhash].[name].js',
     },
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
@@ -77,5 +79,14 @@ module.exports = {
             template: 'src/templates/index.html',
             favicon: 'src/img/favicon.png'
         }),
-    ]
+        new webpack.optimize.CommonsChunkPlugin({
+          name: "commons",
+          minChunks: function (module) {
+             return module.context && module.context.indexOf('node_modules') !== -1;
+          }
+        }),
+    ],
+    devServer: {
+      compress: true,
+    }
 };
