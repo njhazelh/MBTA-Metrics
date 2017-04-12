@@ -3,18 +3,18 @@ import axios from 'axios';
 import store from '../store';
 import { getAlertEventsSuccess } from '../actions/alertEvent-actions'
 
-export function getAlertEvents(dateStart, dateEnd, timeStart, timeEnd) {
+export function getAlertEvents(startDate, endDate, startTime, endTime) {
   console.info(
     'Loading alert_events: dates(%s to %s), times(%s to %s)',
-    dateStart, dateEnd, timeStart, timeEnd
+    startDate, endDate, startTime, endTime
   );
   return axios.get(
     "/data/alert_events", {
       params: {
-        dateState: dateStart,
-        dateEnd: dateEnd,
-        timeStart: timeStart,
-        timeEnd: timeEnd,
+        startDate: startDate,
+        endDate: endDate,
+        startTime: startTime,
+        endTime: endTime,
       }
     }).then(response => {
       console.info('Received alert_events');
