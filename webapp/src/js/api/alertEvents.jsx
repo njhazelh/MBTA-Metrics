@@ -9,7 +9,7 @@ export function getAlertEvents(startDate, endDate, startTime, endTime) {
     startDate, endDate, startTime, endTime
   );
   return axios.get(
-    "/data/alert_events", {
+    '/data/alert_events', {
       params: {
         startDate: startDate,
         endDate: endDate,
@@ -17,8 +17,23 @@ export function getAlertEvents(startDate, endDate, startTime, endTime) {
         endTime: endTime,
       }
     }).then(response => {
-      console.info('Received alert_events');
-      store.dispatch(getAlertEventsSuccess(response.data));
+      if (
+        response == null
+        || response.data == null
+        || response.data.data == null
+        || !Array.isArray(response.data.data)
+      ) {
+        console.error(
+          'Received malformed alert_event data from API',
+          response
+        );
+        return response;
+      }
+      console.info(
+        'Received %d alert_events from API',
+        response.data.data.length
+      );
+      store.dispatch(getAlertEventsSuccess(response.data.data));
       return response;
     }).catch(error => {
       console.error('API Error "alert_events":', error);
