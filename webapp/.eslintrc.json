@@ -13,7 +13,9 @@
         "es6": true
     },
     "rules": {
-        "indent": ["error", 4],
-        "react/prefer-stateless-function": 0
+        "indent": ["error", 2],
+        "react/prefer-stateless-function": 0,
+        "react/prop-types": 0,
+        "import/prefer-default-export": 0
     }
 }

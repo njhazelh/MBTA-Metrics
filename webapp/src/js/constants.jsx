@@ -2,13 +2,13 @@ export const LINES = [
   'FAIRMOUNT', 'FITCHBURG', 'FRAMINGHAM',
   'FRANKLIN', 'GREENBUSH', 'HAVERHILL',
   'KINGSTON', 'LOWELL', 'MIDDLEBOROUGH',
-  'NEEDHAM', 'NEWBURYPORT', 'PROVIDENCE'
+  'NEEDHAM', 'NEWBURYPORT', 'PROVIDENCE',
 ];
 
 export const ALERTS = [
   'Existent', 'Nonexistent',
   'Timely', 'Late',
-  'Accurate','Innaccurate'
+  'Accurate', 'Innaccurate',
 ];
 
 export const DIRECTIONS = ['Inbound', 'Outbound'];

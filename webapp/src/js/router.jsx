@@ -1,8 +1,7 @@
 import React from 'react';
-import { Router, Route, IndexRoute, hashHistory} from 'react-router';
+import { Router, Route, IndexRoute, hashHistory } from 'react-router';
 
 import Home from './components/Home';
-import AlertEventList from './components/AlertEventList';
 import Info from './components/InfoPage';
 import MetricsPage from './components/MetricsPage';
 
