@@ -7,24 +7,26 @@ import { DIRECTIONS } from '../constants';
 
 
 class DirectionSelector extends React.Component {
-  selectAll() {
-    DIRECTIONS.forEach(direction =>
-      store.dispatch(filterActions.setDirectionFilter(direction, true)));
+  static selectAll() {
+    store.dispatch(filterActions.setAllDirectionFilters(true));
   }
 
-  resetAll() {
-    DIRECTIONS.forEach(direction =>
-      store.dispatch(filterActions.setDirectionFilter(direction, false)));
+  static resetAll() {
+    store.dispatch(filterActions.setAllDirectionFilters(false));
   }
 
-  setDirectionFilter(e) {
+  static setDirectionFilter(e) {
     const { value, checked } = e.target;
     store.dispatch(filterActions.setDirectionFilter(value, checked));
   }
 
+  constructor() {
+    super();
+    DirectionSelector.selectAll();
+  }
+
   render() {
-    const {filters} = this.props;
-    console.log(filters);
+    const { filters } = this.props;
     return (
       <fieldset className="my-3">
         <legend>
@@ -33,14 +35,16 @@ class DirectionSelector extends React.Component {
             outline
             color="primary"
             className="togglebutton"
-            onClick={this.selectAll} >
+            onClick={DirectionSelector.selectAll}
+          >
             All
           </Button>
           <Button
             outline
             color="warning"
             className="togglebutton"
-            onClick={this.resetAll} >
+            onClick={DirectionSelector.resetAll}
+          >
             None
           </Button>
         </legend>
@@ -51,17 +55,18 @@ class DirectionSelector extends React.Component {
                 <Col key={dir} xs={6} md={4} lg={3}>
                   <Label check>
                     <Input
-                      type='checkbox'
+                      type="checkbox"
                       name={dir}
                       value={dir}
                       // !! for undefined -> false
                       // This makes sure that the component is always controlled.
                       checked={!!filters[dir]}
-                      onChange={this.setDirectionFilter} />
+                      onChange={DirectionSelector.setDirectionFilter}
+                    />
                     {' '}
                     {dir}
                   </Label>
-                </Col>
+                </Col>,
               )
             }
           </Row>
@@ -71,6 +76,4 @@ class DirectionSelector extends React.Component {
   }
 }
 
-export default connect(store => {
-  return {filters: store.directionFilters};
-})(DirectionSelector);
+export default connect(data => ({ filters: data.directionFilters }))(DirectionSelector);

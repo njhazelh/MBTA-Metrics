@@ -6,9 +6,11 @@ import AccuracyChart from './AccuracyChart';
 import ExistenceChart from './ExistenceChart';
 import TimelinessChart from './TimelinessChart';
 
-export default () =>
-  <Row className='mb-5 justify-content-center'>
-    <Col lg={4} md={6} sm={12} className='my-3'><ExistenceChart/></Col>
-    <Col lg={4} md={6} sm={12} className='my-3'><TimelinessChart/></Col>
-    <Col lg={4} md={6} sm={12} className='my-3'><AccuracyChart/></Col>
+const Charts = () =>
+  <Row className="mb-5 justify-content-center">
+    <Col lg={4} md={6} sm={12} className="my-3"><ExistenceChart /></Col>
+    <Col lg={4} md={6} sm={12} className="my-3"><TimelinessChart /></Col>
+    <Col lg={4} md={6} sm={12} className="my-3"><AccuracyChart /></Col>
   </Row>;
+
+export default Charts;

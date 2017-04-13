@@ -1,54 +1,71 @@
 import React from 'react';
 import { Row, Col, Input, Form, Label, Button } from 'reactstrap';
-import store from '../store';
 import { connect } from 'react-redux';
+
+import store from '../store';
 import * as filterActions from '../actions/filterActions';
-import { LINES } from '../constants';
+import { LINES, LINE_KEYS } from '../constants';
 
 class LineSelector extends React.Component {
-  selectAll() {
-    LINES.forEach(line =>
-      store.dispatch(filterActions.setLineFilter(line, true)));
+  static selectAll() {
+    store.dispatch(filterActions.setAllLineFilters(true));
   }
 
-  resetAll() {
-    LINES.forEach(line =>
-      store.dispatch(filterActions.setLineFilter(line, false)));
+  static resetAll() {
+    store.dispatch(filterActions.setAllLineFilters(false));
   }
 
-  setLineFilter(e) {
-    const {value, checked} = e.target;
+  static setLineFilter(e) {
+    const { value, checked } = e.target;
     store.dispatch(filterActions.setLineFilter(value, checked));
   }
 
+  constructor() {
+    super();
+    LineSelector.selectAll();
+  }
+
   render() {
-    const {filters} = this.props;
+    const { filters } = this.props;
     return (
       <fieldset className="my-3">
         <legend>
           Lines:
-          <Button outline color="primary" className="togglebutton" onClick={this.selectAll}>All</Button>
-          <Button outline color="warning" className="togglebutton" onClick={this.resetAll}>None</Button>
+          <Button
+            outline
+            color="primary"
+            className="togglebutton"
+            onClick={LineSelector.selectAll}
+          >
+            All
+          </Button>
+          <Button
+            outline
+            color="warning"
+            className="togglebutton"
+            onClick={LineSelector.resetAll}
+          >
+            None
+          </Button>
         </legend>
         <Form>
           <Row>
             {
-              LINES.map(line =>
-                <Col xs={6} md={4} lg={3} key={line}>
-                  <Label check style={{whiteSpace: 'nowrap'}}>
+              LINE_KEYS.map(line =>
+                <Col xs={12} sm={6} md={4} lg={3} key={line}>
+                  <Label check style={{ whiteSpace: 'nowrap' }}>
                     <Input
-                      type='checkbox'
-                      name={line}
-                      value={line}
+                      type="checkbox"
+                      value={LINES[line]}
                       // !! for undefined -> false
                       // This makes sure that the component is always controlled.
-                      checked={!!filters[line]}
-                      onChange={this.setLineFilter}
+                      checked={!!filters[LINES[line]]}
+                      onChange={LineSelector.setLineFilter}
                     />
                     {' '}
                     {line}
                   </Label>
-                </Col>
+                </Col>,
               )
             }
           </Row>
@@ -58,6 +75,4 @@ class LineSelector extends React.Component {
   }
 }
 
-export default connect(store => {
-  return {filters: store.lineFilters};
-})(LineSelector);
+export default connect(data => ({ filters: data.lineFilters }))(LineSelector);

@@ -1,27 +1,66 @@
 import React from 'react';
 
+const TIME_FORMAT = 'h:mm A';
+const DATE_FORMAT = 'MM/DD/YYYY';
+
 class AlertEvent extends React.Component {
   render() {
-    let ae = this.props.data;
+    const { data } = this.props;
     return (
       <tr>
-        <td>{ae.trip_id}</td>
-        <td>{ae.date}</td>
-        <td>{ae.time}</td>
-        <td>{ae.day}</td>
-        <td>{ae.route}</td>
-        <td>{ae.stop}</td>
-        <td>{ae.direction}</td>
-        <td>{ae.short_name}</td>
-        <td>{ae.scheduled_departure}</td>
-        <td>{ae.actual_departure}</td>
-        <td>{ae.delay}</td>
-        <td>{ae.alert_issued ? 'Yes' : 'No'}</td>
-        <td>{ae.deserves_alert ? 'Yes' : 'No'}</td>
-        <td>{ae.alert_delay}</td>
-        <td>{ae.alert_text}</td>
-        <td>{ae.predicted_delay}</td>
-        <td>{ae.delay_accuracy}</td>
+        <td>{data.trip_id}</td>
+        <td>
+          {
+            data.date != null
+            ? data.date.format(DATE_FORMAT)
+            : ''
+          }
+        </td>
+        <td>
+          {
+            data.time != null
+            ? data.time.format(TIME_FORMAT)
+            : ''
+          }
+        </td>
+        <td>
+          {
+            data.date != null
+            ? data.date.format('dddd')
+            : ''
+          }
+        </td>
+        <td>{data.route}</td>
+        <td>{data.stop}</td>
+        <td>{data.direction}</td>
+        <td>{data.short_name}</td>
+        <td>
+          {
+            data.scheduled_departure != null
+            ? data.scheduled_departure.format(TIME_FORMAT)
+            : ''
+          }
+        </td>
+        <td>
+          {
+            data.actual_departure != null
+            ? data.actual_departure.format(TIME_FORMAT)
+            : ''
+          }
+        </td>
+        <td>
+          {
+            data.actual_departure != null && data.scheduled_departure != null
+            ? `${data.actual_departure.diff(data.scheduled_departure, 'minutes')} min`
+            : ''
+          }
+        </td>
+        <td>{data.alert_issued ? 'Yes' : 'No'}</td>
+        <td>{data.deserves_alert ? 'Yes' : 'No'}</td>
+        <td>{data.alert_delay}</td>
+        <td>{data.alert_text}</td>
+        <td>{data.predicted_delay}</td>
+        <td>{data.delay_accuracy}</td>
       </tr>
     );
   }

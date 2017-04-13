@@ -106,7 +106,7 @@ class AlertEvent(Base):
             'day': self.day,
             'route': self.route,
             'stop': self.stop,
-            'direction': self.direction,
+            'direction': self.direction.name,
             'short_name': self.short_name,
             'scheduled_departure': None \
                 if self.scheduled_departure is None \
@@ -114,12 +114,12 @@ class AlertEvent(Base):
             'actual_departure': None \
                 if self.actual_departure is None \
                 else  self.actual_departure.isoformat(),
-            'delay': self.delay,
+            'delay': self.delay.total_seconds()/60.0,
             'alert_issued': self.alert_issued,
             'deserves_alert': self.deserves_alert,
-            'alert_delay': self.alert_delay,
+            'alert_delay': self.alert_delay.total_seconds()/60.0,
             'alert_timely': self.alert_timely,
             'alert_text': self.alert_text,
-            'predicted_delay': self.predicted_delay,
-            'delay_accuracy': self.delay_accuracy
+            'predicted_delay': self.predicted_delay.total_seconds()/60.0,
+            'delay_accuracy': self.delay_accuracy.name
         }

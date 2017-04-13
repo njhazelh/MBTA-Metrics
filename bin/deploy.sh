@@ -18,10 +18,14 @@ for service in bin/init.d/*; do
     service "$(basename $service)" restart
 done
 
-# install the webapp
-cd webapp
-rm -rf /usr/share/ngnix/html
-yarn
-yarn build:prod
-cp -Rf dist/* /usr/share/nginx/html
-rm -rf dist
+# Install the webapp:
+
+# Disabled for the moment, because it kills Jenkins via OOM
+# b/c the instance is too small.
+
+# cd webapp
+# rm -rf /usr/share/ngnix/html
+# yarn
+# yarn build:prod
+# cp -Rf dist/* /usr/share/nginx/html
+# rm -rf dist
