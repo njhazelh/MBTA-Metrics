@@ -8,18 +8,21 @@ import { ALERTS } from '../constants';
 
 class AlertSelector extends React.Component {
   static selectAll() {
-    ALERTS.forEach(alert =>
-      store.dispatch(filterActions.setAlertFilter(alert, true)));
+    store.dispatch(filterActions.setAllAlertFilters(true));
   }
 
   static resetAll() {
-    ALERTS.forEach(alert =>
-      store.dispatch(filterActions.setAlertFilter(alert, false)));
+    store.dispatch(filterActions.setAllAlertFilters(false));
   }
 
   static setAlertFilter(e) {
     const { value, checked } = e.target;
     store.dispatch(filterActions.setAlertFilter(value, checked));
+  }
+
+  constructor() {
+    super();
+    AlertSelector.selectAll();
   }
 
   render() {
