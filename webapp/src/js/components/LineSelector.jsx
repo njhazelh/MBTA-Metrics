@@ -4,17 +4,15 @@ import { connect } from 'react-redux';
 
 import store from '../store';
 import * as filterActions from '../actions/filterActions';
-import { LINES } from '../constants';
+import { LINES, LINE_KEYS } from '../constants';
 
 class LineSelector extends React.Component {
   static selectAll() {
-    LINES.forEach(line =>
-      store.dispatch(filterActions.setLineFilter(line, true)));
+    store.dispatch(filterActions.setAllLineFilters(true));
   }
 
   static resetAll() {
-    LINES.forEach(line =>
-      store.dispatch(filterActions.setLineFilter(line, false)));
+    store.dispatch(filterActions.setAllLineFilters(false));
   }
 
   static setLineFilter(e) {
@@ -53,16 +51,15 @@ class LineSelector extends React.Component {
         <Form>
           <Row>
             {
-              LINES.map(line =>
-                <Col xs={6} md={4} lg={3} key={line}>
+              LINE_KEYS.map(line =>
+                <Col xs={12} sm={6} md={4} lg={3} key={line}>
                   <Label check style={{ whiteSpace: 'nowrap' }}>
                     <Input
                       type="checkbox"
-                      name={line}
-                      value={line}
+                      value={LINES[line]}
                       // !! for undefined -> false
                       // This makes sure that the component is always controlled.
-                      checked={!!filters[line]}
+                      checked={!!filters[LINES[line]]}
                       onChange={LineSelector.setLineFilter}
                     />
                     {' '}

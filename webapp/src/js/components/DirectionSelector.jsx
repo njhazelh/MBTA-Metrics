@@ -8,13 +8,11 @@ import { DIRECTIONS } from '../constants';
 
 class DirectionSelector extends React.Component {
   static selectAll() {
-    DIRECTIONS.forEach(direction =>
-      store.dispatch(filterActions.setDirectionFilter(direction, true)));
+    store.dispatch(filterActions.setAllDirectionFilters(true));
   }
 
   static resetAll() {
-    DIRECTIONS.forEach(direction =>
-      store.dispatch(filterActions.setDirectionFilter(direction, false)));
+    store.dispatch(filterActions.setAllDirectionFilters(false));
   }
 
   static setDirectionFilter(e) {

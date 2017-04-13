@@ -47,4 +47,4 @@ class AlertEventList extends React.Component {
   }
 }
 
-export default connect(data => ({ alertEvents: data.alertEvents }))(AlertEventList);
+export default connect(data => ({ alertEvents: data.alertFilteredData }))(AlertEventList);

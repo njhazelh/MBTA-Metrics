@@ -8,6 +8,13 @@ export function setDirectionFilter(direction, value) {
   };
 }
 
+export function setAllDirectionFilters(value) {
+  return {
+    type: types.SET_ALL_DIRECTION_FILTERS,
+    value,
+  };
+}
+
 export function setLineFilter(line, value) {
   return {
     type: types.SET_LINE_FILTER,
@@ -16,6 +23,14 @@ export function setLineFilter(line, value) {
   };
 }
 
+export function setAllLineFilters(value) {
+  return {
+    type: types.SET_ALL_LINE_FILTERS,
+    value,
+  };
+}
+
+
 export function setAlertFilter(alert, value) {
   return {
     type: types.SET_ALERT_FILTER,
@@ -23,6 +38,14 @@ export function setAlertFilter(alert, value) {
     value,
   };
 }
+
+export function setAllAlertFilters(value) {
+  return {
+    type: types.SET_ALL_ALERT_FILTERS,
+    value,
+  };
+}
+
 
 export function setDateTimeFilter(aspect, value) {
   return {

@@ -14,6 +14,12 @@ class DateTimeSelector extends React.Component {
     store.dispatch(filterActions.setDateTimeFilter(name, value));
   }
 
+  componentDidMount() {
+    if (window.location.href.includes('autoload')) {
+      this.loadData();
+    }
+  }
+
   getValue(aspect) {
     return this.props.filters[aspect] || '';
   }

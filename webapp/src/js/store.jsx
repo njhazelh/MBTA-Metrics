@@ -1,5 +1,8 @@
 import { createStore } from 'redux';
-import reducers from './reducers';
+import reduceReducers from 'reduce-reducers';
+import FilterDataReducer from './reducers/FilterDataReducer';
+import ActionReducer from './reducers/ActionReducer';
 
-const store = createStore(reducers);
+const reducer = reduceReducers(ActionReducer, FilterDataReducer);
+const store = createStore(reducer);
 export default store;
