@@ -22,6 +22,11 @@ class DirectionSelector extends React.Component {
     store.dispatch(filterActions.setDirectionFilter(value, checked));
   }
 
+  constructor() {
+    super();
+    DirectionSelector.selectAll();
+  }
+
   render() {
     const { filters } = this.props;
     return (

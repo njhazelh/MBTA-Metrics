@@ -22,6 +22,11 @@ class LineSelector extends React.Component {
     store.dispatch(filterActions.setLineFilter(value, checked));
   }
 
+  constructor() {
+    super();
+    LineSelector.selectAll();
+  }
+
   render() {
     const { filters } = this.props;
     return (

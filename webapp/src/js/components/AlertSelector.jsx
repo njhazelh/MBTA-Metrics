@@ -22,6 +22,11 @@ class AlertSelector extends React.Component {
     store.dispatch(filterActions.setAlertFilter(value, checked));
   }
 
+  constructor() {
+    super();
+    AlertSelector.selectAll();
+  }
+
   render() {
     const { filters } = this.props;
     return (
