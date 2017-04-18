@@ -7,6 +7,7 @@ Create Date: 2017-04-05 16:01:21.066873
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.schema import Sequence, CreateSequence
 
 
 # revision identifiers, used by Alembic.
@@ -25,6 +26,7 @@ def upgrade():
     op.rename_table('alerts_tmp', 'alerts')
 
     # recreate autoincrement behavior for id
+    op.execute(CreateSequence(Sequence('alerts_id_seq')))
     op.execute("SELECT setval('alerts_id_seq', (SELECT max(id) from alerts) + 1, false);")
     op.alter_column("alerts", "id", nullable=False, server_default=sa.text("nextval('alerts_id_seq'::regclass)"))
 
