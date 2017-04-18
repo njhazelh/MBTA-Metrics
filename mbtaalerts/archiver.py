@@ -7,16 +7,17 @@ to our database.
 import os
 import time
 import requests
+from datetime import datetime, timezone
+
+from sqlalchemy.exc import DBAPIError
 
 from mbtaalerts.logging import get_log
 from mbtaalerts.config import config as cfg
-from mbtaalerts.database import database as db
-from sqlalchemy import MetaData, Table
-from sqlalchemy.exc import DBAPIError
-from datetime import datetime, timezone
-from mbtaalerts.database.models \
-    import Alert, AlertAffectedService, AlertEffectPeriod
+from mbtaalerts.database.database import get_db_session
+from mbtaalerts.database.models import \
+    Alert, AlertAffectedService, AlertEffectPeriod
 
+DB_SESSION = get_db_session()
 LOG = get_log('archiver')
 
 def buildAlertEntry(alert):
@@ -167,14 +168,14 @@ class Archiver:
         new_periods_num = len(effect_period_insertions)
         if new_alerts_num > 0:
             LOG.info("Inserting %d alerts.", new_alerts_num)
-            db.DB_SESSION.add_all(alert_insertions)
+            DB_SESSION.add_all(alert_insertions)
         if new_services_num > 0:
             LOG.info("Inserting %d affected services.", new_services_num)
-            db.DB_SESSION.add_all(service_insertions)
+            DB_SESSION.add_all(service_insertions)
         if new_periods_num > 0:
             LOG.info("Inserting %d alert affect periods.", new_periods_num)
-            db.DB_SESSION.add_all(effect_period_insertions)
-        db.DB_SESSION.commit()
+            DB_SESSION.add_all(effect_period_insertions)
+        DB_SESSION.commit()
 
     def updateKnownAlerts(self, alerts_info):
         """Remove unpublished alerts from the known alert set"""
@@ -227,7 +228,6 @@ def main():
     """
     The entry point for the program
     """
-    db.init_db()
     Archiver().run()
 
 if __name__ == "__main__":
