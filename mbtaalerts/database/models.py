@@ -93,7 +93,7 @@ class AlertEvent(Base):
     alert_delay = Column(Interval)
     alert_timely = Column(Boolean)
     alert_text = Column(String(300))
-    predicted_delay = Column(Interval)
+    predicted_delay = Column(String(32))
     delay_accuracy = Column(Enum(DelayAccuracy))
 
     @property
@@ -126,9 +126,7 @@ class AlertEvent(Base):
                 else self.alert_delay.total_seconds() / 60.0,
             'alert_timely': self.alert_timely,
             'alert_text': self.alert_text,
-            'predicted_delay': None\
-                if self.predicted_delay is None\
-                else self.predicted_delay.total_seconds() / 60.0,
+            'predicted_delay': self.predicted_delay,
             'delay_accuracy': None\
                 if self.delay_accuracy is None\
                 else self.delay_accuracy.name
