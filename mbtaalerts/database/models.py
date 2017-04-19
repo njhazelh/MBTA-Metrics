@@ -2,9 +2,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, \
     Date, Time, DateTime, Interval, \
     Boolean, ForeignKey, CheckConstraint, Enum
+from sqlalchemy.ext.declarative import declarative_base
 import enum
 
-from mbtaalerts.database.database import Base
+
+Base = declarative_base()
 
 
 class Direction(enum.Enum):
@@ -22,12 +24,6 @@ class Route(Base):
     __tablename__ = 'routes'
     id = Column(String(32), primary_key=True, unique=True)
     name = Column(String(32), nullable=False)
-    # alert_affected_services = relationship("AlertAffectedServices",
-    #                                        backref="routes",
-    #                                        order_by="AlertAffectedServices.id")
-    # alert_events = relationship("AlertEvents",
-    #                             backref="routes",
-    #                             order_by="AlertEvents.id")
 
 
 class Stop(Base):
@@ -38,6 +34,7 @@ class Stop(Base):
 
 class Alert(Base):
     __tablename__ = 'alerts'
+    id = Column(Integer, primary_key=True, autoincrement=True)
     alert_id = Column(Integer)
     effect_name = Column(String(32))
     effect = Column(String(32))
@@ -49,19 +46,11 @@ class Alert(Base):
     last_modified_dt = Column(DateTime)
     service_effect_text = Column(String(256))
     alert_lifecycle = Column(String(16))
-    # There are issues with these relationships
-    # alert_effect_periods = \
-    #     relationship("AlertEffectPeriod",
-    #                  backref="alerts",
-    #                  order_by="AlertEffectPeriod.id")
-    # alert_affected_services = \
-    #     relationship("AlertAffectedServices",
-    #                  backref="alerts",
-    #                  order_by="AlertAffectedServices.id")
 
 
 class AlertEffectPeriod(Base):
     __tablename__ = 'alert_effect_period'
+    id = Column(Integer, primary_key=True, autoincrement=True)
     alert_id = Column(Integer)
     effect_start = Column(DateTime)
     effect_end = Column(DateTime)
@@ -69,6 +58,7 @@ class AlertEffectPeriod(Base):
 
 class AlertAffectedService(Base):
     __tablename__ = 'alert_affected_services'
+    id = Column(Integer, primary_key=True, autoincrement=True)
     alert_id = Column(Integer)
     route_id = Column(String(32))
     trip_id = Column(String(64))
@@ -77,6 +67,7 @@ class AlertAffectedService(Base):
 
 class AlertEvent(Base):
     __tablename__ = 'alert_events'
+    id = Column(Integer, primary_key=True, autoincrement=True)
     trip_id = Column(String(64))
     date = Column(Date)
     time = Column(Time)

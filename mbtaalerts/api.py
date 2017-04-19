@@ -11,11 +11,12 @@ from flask import Flask, jsonify, request
 from webargs import fields
 from webargs.flaskparser import use_args
 
-from mbtaalerts.database.database import DB_SESSION, init_db
+from mbtaalerts.database.database import get_db_session, init_db
 from mbtaalerts.database.models import AlertEvent
 from mbtaalerts.logging import get_log
 
 
+DB_SESSION = get_db_session()
 LOG = get_log('api')
 APP = Flask(__name__)
 APP.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
@@ -54,15 +55,10 @@ def get_alert_events(args):
         - endTime: The latest time to look at (inclusive).
     :return: A list of alert_events within the given date/time ranges.
     """
-    alert_events = AlertEvent.query \
+    alert_events = DB_SESSION.query(AlertEvent) \
         .filter(AlertEvent.date >= args['startDate']) \
         .filter(AlertEvent.date <= args['endDate']) \
         .filter(AlertEvent.time >= args['startTime']) \
         .filter(AlertEvent.time <= args['endTime']) \
         .all()
     return jsonify(data=[ae.serialize for ae in alert_events])
-
-
-if __name__ == "__main__":
-    init_db()
-    APP.run(host="0.0.0.0")

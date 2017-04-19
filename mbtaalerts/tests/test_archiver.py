@@ -387,11 +387,9 @@ class ArchiverTest(unittest.TestCase):
         alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDict)
         self.assertEqual(self.getNumInsertions(alertsIns), 1)
 
-        print(testArchiver.known_id_lastmodified_pairs)
         sampleAlertsEmptyDict = ast.literal_eval(sampleAlertsEmpty)
         testArchiver.next_cull = 0
         testArchiver.updateKnownAlerts(sampleAlertsEmptyDict)
-        print(testArchiver.known_id_lastmodified_pairs)
 
         alertsIns, affectedServicesIns, effectPeriodsIns = testArchiver.buildAlertInsertions(sampleAlertsDict)
         self.assertEqual(self.getNumInsertions(alertsIns), 1)
