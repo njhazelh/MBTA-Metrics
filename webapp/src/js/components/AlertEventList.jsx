@@ -17,7 +17,7 @@ class AlertEventList extends React.Component {
         );
 
     return (
-      <Table responsive striped bordered className="table-sm mt-5">
+      <Table responsive striped bordered className="table-sm mt-2">
         <thead className="thead-default">
           <tr>
             <th>Trip ID</th>
