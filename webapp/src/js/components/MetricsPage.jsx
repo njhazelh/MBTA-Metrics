@@ -21,7 +21,7 @@ export default class MetricsPage extends React.Component {
           <AlertSelector />
         </Container>
         <Container className="my-3" fluid>
-          <CSVDownloadButton style={{ float: 'right' }} />
+          <CSVDownloadButton />
           <AlertEventList />
         </Container>
       </section>
