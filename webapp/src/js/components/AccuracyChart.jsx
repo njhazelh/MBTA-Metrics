@@ -1,5 +1,7 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Text } from 'recharts';
+import Moment from 'moment';
 
 const VerticalTick = (props) => {
   const { x, y, payload } = props;
@@ -12,34 +14,47 @@ const VerticalTick = (props) => {
   );
 };
 
-export default () => {
-  let data = [
-    { date: new Date(2017, 1, 1), ontime: 50 },
-    { date: new Date(2017, 1, 2), ontime: 60 },
-    { date: new Date(2017, 1, 3), ontime: 70 },
-    { date: new Date(2017, 1, 4), ontime: 66 },
-    { date: new Date(2017, 1, 5), ontime: 73 },
-    { date: new Date(2017, 1, 6), ontime: 80 },
-    { date: new Date(2017, 1, 7), ontime: 81 },
-    { date: new Date(2017, 1, 8), ontime: 80 },
-    { date: new Date(2017, 1, 9) },
-    { date: new Date(2017, 1, 10), ontime: 80 },
-  ];
-  data = data.map(point => ({
-    ...point,
-    date: point.date.toLocaleDateString(),
-  }));
-  return (
-    <fieldset>
-      <legend>Accuracy</legend>
-      <LineChart width={300} height={350} data={data} margin={{ top: 30, right: 5, bottom: 5, left: 0 }} style={{ lineHeight: '15px' }}>
-        <Line name="Trains matching predicted delay" type="monotone" dataKey={'ontime'} stroke="#3a3" activeDot={{ r: 8 }} unit="%" />
-        <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-        <XAxis dataKey={'date'} type="category" tick={<VerticalTick />} interval={0} />
-        <YAxis dataKey={'ontime'} />
-        <Tooltip />
-        <Legend align="left" wrapperStyle={{ marginLeft: 60, paddingTop: 40 }} />
-      </LineChart>
-    </fieldset>
-  );
-};
+class AccuracyChart extends React.Component {
+  render() {
+    const dateFmt = 'MM/DD/YY';
+    const { alertEvents } = this.props;
+    const data = [];
+    const dates = alertEvents.map(ae => ae.date);
+    const minDate = Moment.min([Moment(), ...dates]);
+    const maxDate = Moment.max([minDate, ...dates]);
+    const counts = {};
+    alertEvents.forEach((item) => {
+      const date = item.date.format(dateFmt);
+      if (item.delay_accuracy === 'accurate') {
+        counts[date] = (counts[date] || 0) + 1;
+      }
+    });
+    const today = Moment();
+    if (Object.keys(counts).length > 0) {
+      for (let d = Moment(minDate); d <= maxDate && d <= today; d = d.add(1, 'days')) {
+        const dateString = d.format(dateFmt);
+        const point = { date: dateString };
+        if (counts[dateString] != null) {
+          point.ontime = counts[dateString] || 0;
+        }
+        data.push(point);
+      }
+    }
+    const tickInterval = Math.round(maxDate.diff(minDate, 'days') / 6.0) - 1;
+    return (
+      <fieldset>
+        <legend>Accuracy</legend>
+        <LineChart width={300} height={350} data={data} margin={{ top: 30, right: 5, bottom: 5, left: 0 }} style={{ lineHeight: '15px' }}>
+          <Line name="Trains matching predicted delay" type="monotone" dataKey={'ontime'} stroke="#3a3" activeDot={{ r: 8 }} />
+          <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+          <XAxis dataKey={'date'} type="category" tick={<VerticalTick />} interval={tickInterval} />
+          <YAxis dataKey={'ontime'} />
+          <Tooltip />
+          <Legend align="left" wrapperStyle={{ marginLeft: 60, paddingTop: 40 }} />
+        </LineChart>
+      </fieldset>
+    );
+  }
+}
+
+export default connect(data => ({ alertEvents: data.trainFilteredData }))(AccuracyChart);
