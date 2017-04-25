@@ -3,6 +3,7 @@ import urllib
 from urllib.request import urlopen
 import json
 import datetime
+from datetime import timezone
 import calendar
 import configparser
 import sqlalchemy
@@ -61,8 +62,8 @@ def timeConversion():
     
     endTime=datetime.datetime.fromtimestamp(
         int("1457499992")).strftime('%Y-%m-%d %H:%M:%S')
-    start=datetime.datetime(2017,4,5,3,0,0)
-    finish=datetime.datetime(2017,4,6,3,0,0)
+    start=datetime.datetime(2017,4,18,3,0,0)
+    finish=datetime.datetime(2017,4,19,3,0,0)
     unix_start_time=start.strftime('%s')
     unix_finish_time = finish.strftime('%s')
     return [unix_start_time,unix_finish_time,start,finish]
@@ -84,7 +85,25 @@ convert unix time to year-month-date-hours-minutes-seconds
 def unixTime_to_readable(unixTime):
     return datetime.datetime.fromtimestamp(
         int(unixTime)).strftime('%Y-%m-%d %H:%M:%S')
-
+"""
+convert unix time to hours-minutes-seconds 
+"""
+def getTime(unixTime):
+    if unixTime==None:
+        return None
+    else:
+        return datetime.datetime.fromtimestamp(int(unixTime)).strftime('%H:%M:%S')
+"""
+convert UTC to GMT timeZone
+"""
+def UTC_to_GMT(utc):
+    if utc==None:
+        return None
+    else:
+        utc_dt=datetime.datetime.fromtimestamp(
+            int(utc))
+        gmt=utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
+        return gmt.strftime('%s')
 
 """
 Count number of stations for each line for the testing purposed
@@ -131,7 +150,7 @@ def readFromScheduleAdherence():
                 #", "+ i["delay_sec"]])
 
             scheduleadherence.append([i["trip_id"], i["route_id"],i["direction"],i["sch_dt"],i["act_dt"],i["delay_sec"],station])
-
+    print (len(commuterail_station))        
     #print (scheduleadherence)
     #print (stationMiss) #for error checking purpose
     return scheduleadherence
@@ -170,8 +189,8 @@ def alert_delay(trip_alert,tripID,schedule_departure):
         
         for alert in trip_alert[tripID]:
             if int(alert[1])<last_modified_dt:
-                last_modified_dt=int(alert[1])
-        return str(int(schedule_departure)-last_modified_dt)
+                last_modified_dt=int(UTC_to_GMT(alert[1]))
+        return str(last_modified_dt-int(schedule_departure))
     else:
         return None
 
@@ -193,7 +212,29 @@ def alert_timely(trip_alert,tripID,scheduled_departure):
     if delay ==None:
         return None
     else:
-     return int(delay)>=300
+     return int(delay)<=300
+
+"""
+get correct alert to measure its accuracy, return [message,last_modified_dt] 
+or None
+"""
+def get_alert(trip_alert,tripID,scheduled_departure):
+    last_modified_dt=-1
+    message=""
+    if isAlertIssued(trip_alert,tripID):
+        first_alert=trip_alert[tripID][0]
+        if int(first_alert[1])>=int(scheduled_departure):
+            message=first_alert[3]
+            last_modified_dt=int(first_alert[1])
+        else:
+            for alert in trip_alert[tripID]:
+                if int(alert[1])>last_modified_dt and int(alert[1])<int(scheduled_departure):
+                    message=alert[3]
+                    last_modified_dt=int(alert[1])
+        return [message,last_modified_dt]
+    else:
+        return None
+
 
 """
 get the text message of tripID's associated alert 
@@ -201,16 +242,19 @@ choose the last alert before the schduled departure if there is any
 otherwise choose first alert after the scheduled departure 
 """
 def get_alert_message(trip_alert,tripID,scheduled_departure):
-    last_modified_dt=-1
-    message=""
-    if isAlertIssued(trip_alert,tripID):
-        for alert in trip_alert[tripID]:
-            if int(alert[1])>last_modified_dt:
-                message=alert[3]
-        return message
-    else:
+    if get_alert(trip_alert,tripID,scheduled_departure)==None:
         return None
-
+    else:
+        return (get_alert(trip_alert,tripID,scheduled_departure))[0]
+"""
+get the last modified day of alert to fill in time entry in 
+alert_event table in database 
+"""
+def get_last_modified_dt(trip_alert,tripID,scheduled_departure):
+    if get_alert(trip_alert,tripID,scheduled_departure)==None:
+        return None
+    else:
+        return (get_alert(trip_alert,tripID,scheduled_departure))[1]
 
 """
 parse the alet_message and get the predicted delay 
@@ -230,21 +274,49 @@ def get_predicted_delay(trip_alert,tripID,scheduled_departure):
                 delay=predicted_delay[i-1]
             elif predicted_delay[i]=="m":
                 delay=predicted_delay[i-1]
-        if delay!="":
-            return delay
-        else:
-            return None
+    
+        return delay
 
 
 
 
 """
 measure the accuracy of the alert 
-Always go for the alert right before the scheduled_departure, if there isn't that, then go for 
-the first alert right after the scheduled departure 
+if the delaytime is in the predicted-delay time range, then 
+it is accurate. if delay is less time lower bound of time range it is high, 
+if delay is more than upper bound of time range, it is low 
+if no predicted-delay, then no estimate 
 
 """
-#def delay_accuray():
+def delay_accuray(delay,trip_alert,tripID,scheduled_departure):
+    predicted_delay=get_predicted_delay(trip_alert,tripID,scheduled_departure)
+
+    high="high"
+    low="low"
+    accurate="accurate"
+    empty=None
+    if predicted_delay==None:
+        return None
+    elif predicted_delay=="":
+        return empty
+    else:
+        timebound=predicted_delay.split('-')
+        d=int(delay)
+        if len(timebound)>1:
+            if d>=int(timebound[0])*60 and d<=int(timebound[1])*60:
+                return accurate
+            elif d<int(timebound[0])*60:
+                return high
+            elif d>int(timebound[1])*60:
+                return low 
+        else:
+            if d==int(timebound[0])*60:
+                return accurate
+            elif d<int(timebound[0])*60:
+                return high
+            elif d>int(timebound[0])*60:
+                return low
+
 
 
 
@@ -405,13 +477,12 @@ def alert_events(metadata):
 
     for trip in scheduleadherence:
         if isAlertIssued(dic,trip[0]) or deserves_alert(trip[5]):
-            alertevents.append([trip[0],str(date),str(time),str(day),str(trip[1]),str(trip[6]),direction(int(trip[2])),str(trip[6])+" Train " +trip[0][19:],
+            alertevents.append([trip[0],str(date),getTime(UTC_to_GMT(get_last_modified_dt(dic,trip[0],trip[3]))),str(day),str(trip[1]),str(trip[6]),direction(int(trip[2])),str(trip[1][3:])+" Train " +trip[0][19:],
                 unixTime_to_readable(str(trip[3])),unixTime_to_readable(str(trip[4])),trip[5],isAlertIssued(dic,trip[0]),deserves_alert(trip[5]),
                 alert_delay(dic,trip[0],trip[3]),alert_timely(dic,trip[0],trip[3]),
-                get_alert_message(dic,trip[0],trip[3]),get_predicted_delay(dic,trip[0],trip[3])
+                get_alert_message(dic,trip[0],trip[3]),get_predicted_delay(dic,trip[0],trip[3]),delay_accuray(trip[5],dic,trip[0],trip[3])
             
             ])
-        #change short name to routeID+ train+ last few digits in tripID e.g.: Newburyport train 128
 
     #for a in alertevents:
         #print (a)
@@ -428,7 +499,7 @@ def writeToAlertEventsTable(metadata):
     for entry in data: 
      
         i.execute(trip_id=entry[0],date=entry[1],time=entry[2],
-            #day=entry[3],
+            day=entry[3],
             route=entry[4],
             stop=entry[5],
             direction=entry[6],
@@ -437,8 +508,9 @@ def writeToAlertEventsTable(metadata):
             alert_issued=entry[11],deserves_alert=entry[12],
             alert_delay=entry[13],
             alert_timely=entry[14],
-            alert_text=entry[15]
-            #predicted_delay=entry[16]
+            alert_text=entry[15],
+            predicted_delay=entry[16],
+            delay_accuracy=entry[17]
 
             )
 
@@ -448,20 +520,19 @@ delete rows in table
 def deleteEntries(metadata):
     alertevents=Table('alert_events',metadata,autoload=True)
     d=alertevents.delete()
-    for i in range (4878,5615):
+    for i in range (9286,11003):
         d.execute(id=str(i))
     
 
 if __name__=="__main__":
-    #readFromScheduleAdherence()
+    readFromScheduleAdherence()
 
     metadata=databaseConnect()
     #alert_events(metadata)
     #read_alerts(metadata)
     #read_alert_affected_services(metadata)
     #tripID_to_alertID(metadata)
-    #writeToDataBase(metadata)
-    writeToAlertEventsTable(metadata)
+    #writeToAlertEventsTable(metadata)
     #deleteEntries(metadata)
 
 
