@@ -20,6 +20,7 @@ from mbtaalerts.database.models import \
 DB_SESSION = get_db_session()
 LOG = get_log('archiver')
 
+
 def buildAlertEntry(alert):
     """Build a database insertion from alert data"""
     stamp_created = datetime.fromtimestamp(int(alert['created_dt']),
@@ -38,15 +39,17 @@ def buildAlertEntry(alert):
                  service_effect_text=str(alert['service_effect_text']),
                  alert_lifecycle=str(alert['alert_lifecycle']))
 
+
 def buildServicesEntry(alert_id, affected_service):
     """Build an affected services insertion"""
-    route_id=str(affected_service.get('route_id'))
-    trip_id=str(affected_service.get('trip_id', None))
-    trip_name=str(affected_service.get('trip_name', None))
+    route_id = str(affected_service.get('route_id'))
+    trip_id = str(affected_service.get('trip_id', None))
+    trip_name = str(affected_service.get('trip_name', None))
     return AlertAffectedService(alert_id=alert_id,
-                                 route_id=route_id,
-                                 trip_id=trip_id,
-                                 trip_name=trip_name)
+                                route_id=route_id,
+                                trip_id=trip_id,
+                                trip_name=trip_name)
+
 
 def buildEffectPeriodsEntry(alert_id, effectPeriod):
     """Build the insertion for an alert's effect period"""
@@ -60,6 +63,7 @@ def buildEffectPeriodsEntry(alert_id, effectPeriod):
     return AlertEffectPeriod(alert_id=alert_id,
                              effect_start=stamp_start,
                              effect_end=stamp_end)
+
 
 class Archiver:
     """The archiver takes in raw alert data and stores it in the database."""
@@ -85,8 +89,8 @@ class Archiver:
     def storeAlerts(self, alerts_info):
         """Convenience method for preparing and then executing the update operation."""
         alerts_ins, \
-        affected_services_ins, \
-        effect_periods_ins  = self.buildAlertInsertions(alerts_info)
+            affected_services_ins, \
+            effect_periods_ins = self.buildAlertInsertions(alerts_info)
         self.insertData(alerts_ins, affected_services_ins, effect_periods_ins)
 
     def buildAlertInsertions(self, alerts_info):
@@ -223,12 +227,13 @@ class Archiver:
             LOG.info("Finished scanning new alerts")
             time.sleep(self.scan_frequency_sec)
 
-def main():
 
+def main():
     """
     The entry point for the program
     """
     Archiver().run()
+
 
 if __name__ == "__main__":
     main()
