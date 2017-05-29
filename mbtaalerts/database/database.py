@@ -1,26 +1,37 @@
-import os
-
-from sqlalchemy import create_engine, Column, Integer, MetaData
+from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
 from mbtaalerts.config import config as cfg
+from mbtaalerts.logging import get_log
 
-ENGINE = create_engine(cfg.get('Database', 'database_url'))
-DB_SESSION = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
-                                         bind=ENGINE))
 
-@as_declarative()
-class Base(object):
-    query = DB_SESSION.query_property()
-    id = Column(Integer, primary_key=True, autoincrement=True)
+LOG = get_log('database')
+ENGINE = None
 
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
+
+def setup_engine(url):
+    global ENGINE
+    ENGINE = create_engine(url)
+    LOG.info('Creating new db engine: %s', ENGINE)
+
+
+def reset_engine():
+    global ENGINE
+    ENGINE = None
+    LOG.info('Resetting db engine: %s', ENGINE)
+
+
+def get_db_session():
+    if ENGINE is None:
+        setup_engine(cfg.get('Database', 'database_url'))
+    session = sessionmaker(autocommit=False,
+                           autoflush=False,
+                           bind=ENGINE)
+    return scoped_session(session)
 
 
 def init_db():
-    import mbtaalerts.database.models
+    from mbtaalerts.database.models import Base
+    if ENGINE is None:
+        setup_engine(cfg.get('Database', 'database_url'))
     Base.metadata.create_all(bind=ENGINE)

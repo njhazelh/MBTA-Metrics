@@ -7,6 +7,7 @@ import DirectionSelector from './DirectionSelector';
 import Charts from './ChartsComponent';
 import DateTimeSelector from './DateTimeSelector';
 import AlertEventList from './AlertEventList';
+import CSVDownloadButton from './CSVDownloadButton';
 
 export default class MetricsPage extends React.Component {
   render() {
@@ -20,6 +21,7 @@ export default class MetricsPage extends React.Component {
           <AlertSelector />
         </Container>
         <Container className="my-3" fluid>
+          <CSVDownloadButton />
           <AlertEventList />
         </Container>
       </section>

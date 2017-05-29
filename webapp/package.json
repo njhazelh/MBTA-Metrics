@@ -4,7 +4,7 @@
   "description": "A Single Page Application to display alert metrics.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --coverage",
     "lint": "eslint --color -c .eslintrc.json --ext .jsx,.js src",
     "lint:fix": "eslint --color -c .eslintrc.json --fix --ext .jsx,.js src",
     "build": "webpack -d --color --progress --devtool sourcemap",
@@ -39,21 +39,41 @@
   },
   "dependencies": {
     "axios": "^0.15.3",
+    "babel-jest": "^19.0.0",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-polyfill": "^6.23.0",
     "babel-preset-stage-1": "^6.24.1",
     "bootstrap": "4",
     "empty-module": "^0.0.2",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^19.0.2",
     "moment": "^2.18.1",
+    "moxios": "^0.4.0",
     "react": "^15.4.2",
     "react-addons-css-transition-group": "^15.4.2",
     "react-addons-transition-group": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-redux": "^5.0.3",
     "react-router": "3",
+    "react-test-renderer": "^15.5.4",
     "reactstrap": "^4.3.0",
     "recharts": "^0.21.2",
     "reduce-reducers": "^0.1.2",
-    "redux": "^3.6.0"
+    "redux": "^3.6.0",
+    "redux-mock-store": "^1.2.3"
+  },
+  "jest": {
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(js|jsx)$",
+    "moduleFileExtensions": [
+      "js",
+      "jsx"
+    ],
+    "moduleNameMapper": {
+      "\\.(css)$": "identity-obj-proxy",
+      "alert_events_api": "empty-module"
+    },
+    "collectCoverageFrom": [
+      "src/js/**/*.jsx"
+    ]
   }
 }

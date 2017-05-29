@@ -28,3 +28,7 @@ include_service_alerts: true
 format: %%(asctime)s %%(name)s %%(levelname)s %%(message)s
 datefmt: %%m/%%d %%H:%%M:%%S
 level: INFO
+
+[Evaluator]
+schedule_adherence_api = http://realtime.mbta.com/developer/api/v2.1/scheduleadherence
+api_key:

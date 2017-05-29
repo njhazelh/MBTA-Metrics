@@ -50,14 +50,20 @@ class AlertEvent extends React.Component {
         </td>
         <td>
           {
-            data.actual_departure != null && data.scheduled_departure != null
-            ? `${data.actual_departure.diff(data.scheduled_departure, 'minutes')} min`
+            data.delay != null
+            ? `${Math.round(data.delay)} min`
             : ''
           }
         </td>
         <td>{data.alert_issued ? 'Yes' : 'No'}</td>
         <td>{data.deserves_alert ? 'Yes' : 'No'}</td>
-        <td>{data.alert_delay}</td>
+        <td>
+          {
+            data.alert_delay != null
+            ? `${Math.round(data.alert_delay)} min`
+            : ''
+          }
+        </td>
         <td>{data.alert_text}</td>
         <td>{data.predicted_delay}</td>
         <td>{data.delay_accuracy}</td>

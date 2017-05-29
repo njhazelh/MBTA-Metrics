@@ -21,7 +21,7 @@ function alertFilter(state) {
     const alertExisted = item.alert_issued;
     const alertIsTimely = item.alert_timely;
     const alertIsAccurate = item.delay_accuracy != null
-      && item.delay_accuracy.toLowerCase() === 'high';
+      && item.delay_accuracy.toLowerCase() === 'accurate';
     const existenceFilter =
       (alertExisted && state.alertFilters.Existent)
       || (!alertExisted && state.alertFilters.Nonexistent);

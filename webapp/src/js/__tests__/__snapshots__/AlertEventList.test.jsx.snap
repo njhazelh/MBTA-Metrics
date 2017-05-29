@@ -1,0 +1,607 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AlertEventList should render data 1`] = `
+<div
+  className="table-responsive"
+>
+  <table
+    className="table-sm mt-5 table table-bordered table-striped"
+  >
+    <thead
+      className="thead-default"
+    >
+      <tr>
+        <th>
+          Trip ID
+        </th>
+        <th>
+          Date
+        </th>
+        <th>
+          Time
+        </th>
+        <th>
+          Day
+        </th>
+        <th>
+          Route
+        </th>
+        <th>
+          Stop
+        </th>
+        <th>
+          Direction
+        </th>
+        <th>
+          Short Name
+        </th>
+        <th>
+          Scheduled Dep.
+        </th>
+        <th>
+          Actual Dep.
+        </th>
+        <th>
+          Delay
+        </th>
+        <th>
+          Alert?
+        </th>
+        <th>
+          Deserves Alert?
+        </th>
+        <th>
+          Alert Delay
+        </th>
+        <th>
+          Alert Text
+        </th>
+        <th>
+          Predicted Delay
+        </th>
+        <th>
+          Delay Accuracy
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td>
+          inbound
+        </td>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td />
+      </tr>
+      <tr>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td>
+          outbound
+        </td>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td />
+      </tr>
+      <tr>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td>
+          inbound
+        </td>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          12:00 AM
+        </td>
+        <td>
+          -15 min
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td />
+      </tr>
+      <tr>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td />
+        <td />
+        <td>
+          12:00 AM
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          5 min
+        </td>
+        <td />
+        <td />
+        <td />
+      </tr>
+      <tr>
+        <td />
+        <td>
+          04/26/2017
+        </td>
+        <td>
+          12:00 AM
+        </td>
+        <td>
+          Wednesday
+        </td>
+        <td />
+        <td />
+        <td />
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td />
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`AlertEventList should render data 2`] = `
+<div
+  className="table-responsive"
+>
+  <table
+    className="table-sm mt-5 table table-bordered table-striped"
+  >
+    <thead
+      className="thead-default"
+    >
+      <tr>
+        <th>
+          Trip ID
+        </th>
+        <th>
+          Date
+        </th>
+        <th>
+          Time
+        </th>
+        <th>
+          Day
+        </th>
+        <th>
+          Route
+        </th>
+        <th>
+          Stop
+        </th>
+        <th>
+          Direction
+        </th>
+        <th>
+          Short Name
+        </th>
+        <th>
+          Scheduled Dep.
+        </th>
+        <th>
+          Actual Dep.
+        </th>
+        <th>
+          Delay
+        </th>
+        <th>
+          Alert?
+        </th>
+        <th>
+          Deserves Alert?
+        </th>
+        <th>
+          Alert Delay
+        </th>
+        <th>
+          Alert Text
+        </th>
+        <th>
+          Predicted Delay
+        </th>
+        <th>
+          Delay Accuracy
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td>
+          inbound
+        </td>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td />
+      </tr>
+      <tr>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td>
+          outbound
+        </td>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td />
+      </tr>
+      <tr>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td>
+          inbound
+        </td>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          12:00 AM
+        </td>
+        <td>
+          -15 min
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td />
+      </tr>
+      <tr>
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td />
+        <td />
+        <td>
+          12:00 AM
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          5 min
+        </td>
+        <td />
+        <td />
+        <td />
+      </tr>
+      <tr>
+        <td />
+        <td>
+          04/26/2017
+        </td>
+        <td>
+          12:00 AM
+        </td>
+        <td>
+          Wednesday
+        </td>
+        <td />
+        <td />
+        <td />
+        <td />
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          
+        </td>
+        <td />
+        <td />
+        <td />
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`AlertEventList should render data 3`] = `
+<div
+  className="table-responsive"
+>
+  <table
+    className="table-sm mt-5 table table-bordered table-striped"
+  >
+    <thead
+      className="thead-default"
+    >
+      <tr>
+        <th>
+          Trip ID
+        </th>
+        <th>
+          Date
+        </th>
+        <th>
+          Time
+        </th>
+        <th>
+          Day
+        </th>
+        <th>
+          Route
+        </th>
+        <th>
+          Stop
+        </th>
+        <th>
+          Direction
+        </th>
+        <th>
+          Short Name
+        </th>
+        <th>
+          Scheduled Dep.
+        </th>
+        <th>
+          Actual Dep.
+        </th>
+        <th>
+          Delay
+        </th>
+        <th>
+          Alert?
+        </th>
+        <th>
+          Deserves Alert?
+        </th>
+        <th>
+          Alert Delay
+        </th>
+        <th>
+          Alert Text
+        </th>
+        <th>
+          Predicted Delay
+        </th>
+        <th>
+          Delay Accuracy
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        style={
+          Object {
+            "textAlign": "center",
+          }
+        }
+      >
+        <td
+          className="py-5"
+          colSpan="17"
+        >
+          No Data Loaded
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
