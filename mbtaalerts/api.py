@@ -55,6 +55,7 @@ def get_alert_events(args):
         - endTime: The latest time to look at (inclusive).
     :return: A list of alert_events within the given date/time ranges.
     """
+    # TODO Fltering on 'time' should probably be on 'scheduled_departure'
     alert_events = DB_SESSION.query(AlertEvent) \
         .filter(AlertEvent.date >= args['startDate']) \
         .filter(AlertEvent.date <= args['endDate']) \

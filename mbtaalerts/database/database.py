@@ -1,5 +1,3 @@
-import os
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -8,7 +6,6 @@ from mbtaalerts.logging import get_log
 
 
 LOG = get_log('database')
-DATABASE_URL = cfg.get('Database', 'database_url')
 ENGINE = None
 
 
@@ -26,7 +23,7 @@ def reset_engine():
 
 def get_db_session():
     if ENGINE is None:
-        setup_engine(DATABASE_URL)
+        setup_engine(cfg.get('Database', 'database_url'))
     session = sessionmaker(autocommit=False,
                            autoflush=False,
                            bind=ENGINE)
@@ -36,5 +33,5 @@ def get_db_session():
 def init_db():
     from mbtaalerts.database.models import Base
     if ENGINE is None:
-        setup_engine(DATABASE_URL)
+        setup_engine(cfg.get('Database', 'database_url'))
     Base.metadata.create_all(bind=ENGINE)
